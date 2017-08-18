@@ -37,7 +37,7 @@ float GetIrisScore(const Classifier &classifier) {
     auto X = GetIrisX();
     auto y = GetIrisY();
     float sum = 0;
-    for(unsigned int i = 0; i < y.size(); ++i) {
+    for(unsigned long i = 0; i < y.size(); ++i) {
       float p = classifier.predict({X[0][i], X[1][i], X[2][i], X[3][i]});
       sum += (y[i]-p)*(y[i]-p);
     }

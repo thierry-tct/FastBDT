@@ -21,35 +21,35 @@ extern "C" {
       return expertise;
     }
     
-    void SetBinning(void *ptr, unsigned int* binning, unsigned int size) {
-      reinterpret_cast<Expertise*>(ptr)->classifier.SetBinning(std::vector<unsigned int>(binning, binning + size));
+    void SetBinning(void *ptr, unsigned long* binning, unsigned long size) {
+      reinterpret_cast<Expertise*>(ptr)->classifier.SetBinning(std::vector<unsigned long>(binning, binning + size));
     }
 
-    void SetPurityTransformation(void *ptr, bool* purityTransformation, unsigned int size) {
+    void SetPurityTransformation(void *ptr, bool* purityTransformation, unsigned long size) {
       reinterpret_cast<Expertise*>(ptr)->classifier.SetPurityTransformation(std::vector<bool>(purityTransformation, purityTransformation + size));
     }
     
-    void SetNTrees(void *ptr, unsigned int nTrees) {
+    void SetNTrees(void *ptr, unsigned long nTrees) {
       reinterpret_cast<Expertise*>(ptr)->classifier.SetNTrees(nTrees);
     }
 
-    unsigned int GetNTrees(void *ptr) {
+    unsigned long GetNTrees(void *ptr) {
       return reinterpret_cast<Expertise*>(ptr)->classifier.GetNTrees();
     }
     
-    void SetDepth(void *ptr, unsigned int depth) {
+    void SetDepth(void *ptr, unsigned long depth) {
       reinterpret_cast<Expertise*>(ptr)->classifier.SetDepth(depth);
     }
 
-    unsigned int GetDepth(void *ptr) {
+    unsigned long GetDepth(void *ptr) {
       return reinterpret_cast<Expertise*>(ptr)->classifier.GetDepth();
     }
     
-    void SetNumberOfFlatnessFeatures(void *ptr, unsigned int numberOfFlatnessFeatures) {
+    void SetNumberOfFlatnessFeatures(void *ptr, unsigned long numberOfFlatnessFeatures) {
       reinterpret_cast<Expertise*>(ptr)->classifier.SetNumberOfFlatnessFeatures(numberOfFlatnessFeatures);
     }
 
-    unsigned int GetNumberOfFlatnessFeatures(void *ptr) {
+    unsigned long GetNumberOfFlatnessFeatures(void *ptr) {
       return reinterpret_cast<Expertise*>(ptr)->classifier.GetNumberOfFlatnessFeatures();
     }
     
@@ -97,7 +97,7 @@ extern "C" {
       delete reinterpret_cast<Expertise*>(ptr);
     }
     
-    void Fit(void *ptr, float *data_ptr, float *weight_ptr, bool *target_ptr, unsigned int nEvents, unsigned int nFeatures) {
+    void Fit(void *ptr, float *data_ptr, float *weight_ptr, bool *target_ptr, unsigned long nEvents, unsigned long nFeatures) {
       Expertise *expertise = reinterpret_cast<Expertise*>(ptr);
 
       std::vector<float> w;
@@ -108,9 +108,9 @@ extern "C" {
 
       std::vector<bool> y(target_ptr, target_ptr + nEvents);
       std::vector<std::vector<float>> X(nFeatures);
-      for(unsigned int iFeature = 0; iFeature < nFeatures; ++iFeature) {
+      for(unsigned long iFeature = 0; iFeature < nFeatures; ++iFeature) {
         std::vector<float> temp(nEvents);
-        for(unsigned int iEvent = 0; iEvent < nEvents; ++iEvent) {
+        for(unsigned long iEvent = 0; iEvent < nEvents; ++iEvent) {
           temp[iEvent] = data_ptr[iEvent*nFeatures + iFeature];
         }
         X[iFeature] = temp;
@@ -135,10 +135,10 @@ extern "C" {
       return expertise->classifier.predict(std::vector<float>(array, array + expertise->classifier.GetNFeatures()));
     }
     
-    void PredictArray(void *ptr, float *array, float *result, unsigned int nEvents) {
+    void PredictArray(void *ptr, float *array, float *result, unsigned long nEvents) {
       Expertise *expertise = reinterpret_cast<Expertise*>(ptr);
-      unsigned int nFeatures = expertise->classifier.GetNFeatures();
-      for(unsigned int iEvent = 0; iEvent < nEvents; ++iEvent) {
+      unsigned long nFeatures = expertise->classifier.GetNFeatures();
+      for(unsigned long iEvent = 0; iEvent < nEvents; ++iEvent) {
         result[iEvent] = expertise->classifier.predict(std::vector<float>(array + iEvent*nFeatures, array + (iEvent+1)*nFeatures));
       }
     }
@@ -164,9 +164,9 @@ extern "C" {
       return ranking;
     }
     
-    unsigned int ExtractNumberOfVariablesFromVariableRanking(void* ptr) {
+    unsigned long ExtractNumberOfVariablesFromVariableRanking(void* ptr) {
       VariableRanking *ranking = reinterpret_cast<VariableRanking*>(ptr);
-      unsigned int max = 0;
+      unsigned long max = 0;
       for(auto &pair : ranking->ranking) {
         if(pair.first > max) {
           max = pair.first;
@@ -175,7 +175,7 @@ extern "C" {
       return max+1;
     }
     
-    double ExtractImportanceOfVariableFromVariableRanking(void* ptr, unsigned int iFeature) {
+    double ExtractImportanceOfVariableFromVariableRanking(void* ptr, unsigned long iFeature) {
       VariableRanking *ranking = reinterpret_cast<VariableRanking*>(ptr);
       if ( ranking->ranking.find( iFeature ) == ranking->ranking.end() )
         return 0.0;

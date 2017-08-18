@@ -22,7 +22,7 @@ class CInterfaceTest : public ::testing::Test {
 
 TEST_F(CInterfaceTest, SetGetBinning ) {
 
-    unsigned int binning[] = {10u, 20u};
+    unsigned long binning[] = {10u, 20u};
     SetBinning(expertise, binning, 2);
     EXPECT_EQ(expertise->classifier.GetBinning().size(), 2u);
     EXPECT_EQ(expertise->classifier.GetBinning()[0], 10u);
@@ -112,7 +112,7 @@ TEST_F(CInterfaceTest, FitAndPredictWorksWithoutWeights ) {
     SetDepth(expertise, 1u);
     SetSubsample(expertise, 1.0);
     SetShrinkage(expertise, 1.0);
-    unsigned int binning[] = {2u, 2u};
+    unsigned long binning[] = {2u, 2u};
     SetBinning(expertise, binning, 2);
     SetTransform2Probability(expertise, true);
     SetNumberOfFlatnessFeatures(expertise, 0);
@@ -138,7 +138,7 @@ TEST_F(CInterfaceTest, TrainAndAnalyseForestWorksWithSpectators ) {
     SetDepth(expertise, 1u);
     SetSubsample(expertise, 1.0);
     SetShrinkage(expertise, 1.0);
-    unsigned int binning[] = {2u, 2u, 2u, 3u};
+    unsigned long binning[] = {2u, 2u, 2u, 3u};
     SetBinning(expertise, binning, 4);
     SetTransform2Probability(expertise, true);
     SetNumberOfFlatnessFeatures(expertise, 2);
@@ -166,7 +166,7 @@ TEST_F(CInterfaceTest, TrainAndAnalyseForestWorksWithWeights ) {
     SetDepth(expertise, 1u);
     SetSubsample(expertise, 1.0);
     SetShrinkage(expertise, 1.0);
-    unsigned int binning[] = {2u, 2u};
+    unsigned long binning[] = {2u, 2u};
     SetBinning(expertise, binning, 2);
     SetTransform2Probability(expertise, true);
     SetNumberOfFlatnessFeatures(expertise, 0);

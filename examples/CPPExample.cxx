@@ -27,9 +27,9 @@ float GetIrisScore(const FastBDT::Classifier &classifier) {
     auto X = GetIrisX();
     auto y = GetIrisY();
     float sum = 0;
-    for(unsigned int i = 0; i < y.size(); ++i) {
+    for(unsigned long i = 0; i < y.size(); ++i) {
       float p = classifier.predict({X[0][i], X[1][i], X[2][i], X[3][i]});
-      sum += (static_cast<int>(y[i])-p)*(static_cast<int>(y[i])-p);
+      sum += (static_cast<long>(y[i])-p)*(static_cast<long>(y[i])-p);
     }
     return sum;
 }

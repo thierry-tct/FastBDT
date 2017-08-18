@@ -69,10 +69,10 @@ namespace FastBDT {
   
   template<>
   std::istream& operator>>(std::istream& stream, std::vector<float> &vector) {
-     unsigned int size;
+     unsigned long size;
      stream >> size;
      vector.resize(size);
-     for(unsigned int i = 0; i < size; ++i) {
+     for(unsigned long i = 0; i < size; ++i) {
          std::string temp;
          stream >> temp;
          vector[i] = convert_to_float_safely(temp);
@@ -82,10 +82,10 @@ namespace FastBDT {
   
   template<>
   std::istream& operator>>(std::istream& stream, std::vector<double> &vector) {
-     unsigned int size;
+     unsigned long size;
      stream >> size;
      vector.resize(size);
-     for(unsigned int i = 0; i < size; ++i) {
+     for(unsigned long i = 0; i < size; ++i) {
          std::string temp;
          stream >> temp;
          vector[i] = convert_to_double_safely(temp);
@@ -138,7 +138,7 @@ namespace FastBDT {
   
   std::istream& operator>>(std::istream& stream, PurityTransformation &purityTransformation) {
 
-      std::vector<unsigned int> mapping;
+      std::vector<unsigned long> mapping;
       stream >> mapping;
       purityTransformation.SetMapping(mapping);
       return stream;

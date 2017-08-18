@@ -61,10 +61,10 @@ namespace FastBDT {
    */
   template<class T>
   std::istream& operator>>(std::istream& stream, std::vector<T> &vector) {
-     unsigned int size;
+     unsigned long size;
      stream >> size;
      vector.resize(size);
-     for(unsigned int i = 0; i < size; ++i) {
+     for(unsigned long i = 0; i < size; ++i) {
          T temp;
          stream >> temp;
          vector[i] = temp;
@@ -143,10 +143,10 @@ namespace FastBDT {
    */
   template<class T>
   Tree<T> readTreeFromStream(std::istream& stream) {
-      unsigned int size;
+      unsigned long size;
       stream >> size;
       std::vector<Cut<T>> cuts(size);
-      for(unsigned int i = 0; i < size; ++i) {
+      for(unsigned long i = 0; i < size; ++i) {
         stream >> cuts[i];
       }
 
@@ -201,10 +201,10 @@ namespace FastBDT {
 
       Forest<T> forest(shrinkage, F0, transform2probability);
 
-      unsigned int size;
+      unsigned long size;
       stream >> size;
 
-      for(unsigned int i = 0; i < size; ++i) {
+      for(unsigned long i = 0; i < size; ++i) {
         forest.AddTree(readTreeFromStream<T>(stream));
       }
 
@@ -248,7 +248,7 @@ namespace FastBDT {
   template<class T>
   FeatureBinning<T> readFeatureBinningFromStream(std::istream& stream) {
   
-      unsigned int nLevels;
+      unsigned long nLevels;
       stream >> nLevels; 
 
       std::vector<T> bins;
@@ -263,9 +263,9 @@ namespace FastBDT {
    */
   template<class T>
   std::istream& operator>>(std::istream& stream, std::vector<FeatureBinning<T>> &vector) {
-     unsigned int size;
+     unsigned long size;
      stream >> size;
-     for(unsigned int i = 0; i < size; ++i)
+     for(unsigned long i = 0; i < size; ++i)
          vector.push_back(readFeatureBinningFromStream<T>(stream));
      return stream;
   }

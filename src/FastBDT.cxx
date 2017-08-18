@@ -10,16 +10,16 @@
 
 namespace FastBDT {
 
-  std::vector<Weight> EventWeights::GetSums(unsigned int nSignals) const {
+  std::vector<Weight> EventWeights::GetSums(unsigned long nSignals) const {
 
     // Vectorizing FTW!
     std::vector<Weight> sums(3,0);
-    for(unsigned int i = 0; i < nSignals; ++i) {
+    for(unsigned long i = 0; i < nSignals; ++i) {
       sums[0] += boost_weights[i] * original_weights[i];
       sums[2] += boost_weights[i]*boost_weights[i] * original_weights[i];
     }
 
-    for(unsigned int i = nSignals; i < original_weights.size(); ++i) {
+    for(unsigned long i = nSignals; i < original_weights.size(); ++i) {
       sums[1] += boost_weights[i] * original_weights[i];
       sums[2] += boost_weights[i]*boost_weights[i] * original_weights[i];
     }
@@ -27,7 +27,7 @@ namespace FastBDT {
 
   }
   
-  EventValues::EventValues(unsigned int nEvents, unsigned int nFeatures, unsigned int nSpectators, const std::vector<unsigned int> &nLevels) : values(nEvents*(nFeatures+nSpectators), 0), nFeatures(nFeatures), nSpectators(nSpectators) {
+  EventValues::EventValues(unsigned long nEvents, unsigned long nFeatures, unsigned long nSpectators, const std::vector<unsigned long> &nLevels) : values(nEvents*(nFeatures+nSpectators), 0), nFeatures(nFeatures), nSpectators(nSpectators) {
 
     if(nFeatures + nSpectators != nLevels.size()) {
       throw std::runtime_error("Number of features must be the same as the number of provided binning levels! " + std::to_string(nFeatures) + " + " + std::to_string(nSpectators) + " vs " + std::to_string(nLevels.size()));
@@ -44,7 +44,7 @@ namespace FastBDT {
 
   }
 
-  void EventValues::Set(unsigned int iEvent, const std::vector<unsigned int> &features) {
+  void EventValues::Set(unsigned long iEvent, const std::vector<unsigned long> &features) {
 
     // Check if the feature vector has the correct size
     if(features.size() != nFeatures + nSpectators) {
@@ -52,19 +52,19 @@ namespace FastBDT {
     }
 
     // Check if the feature values are in the correct range
-    for(unsigned int iFeature = 0; iFeature < nFeatures+nSpectators; ++iFeature) {
+    for(unsigned long iFeature = 0; iFeature < nFeatures+nSpectators; ++iFeature) {
       if( features[iFeature] > nBins[iFeature] )
         throw std::runtime_error(std::string("Promised number of bins is violated. ") + std::to_string(features[iFeature]) + " vs " + std::to_string(nBins[iFeature]));
     }
 
     // Now add the new values to the values vector.
-    for(unsigned int iFeature = 0; iFeature < nFeatures+nSpectators; ++iFeature) {
+    for(unsigned long iFeature = 0; iFeature < nFeatures+nSpectators; ++iFeature) {
       values[iEvent*(nFeatures+nSpectators) + iFeature] = features[iFeature];
     }
 
   }
 
-  void EventSample::AddEvent(const std::vector<unsigned int> &features, Weight weight, bool isSignal) {
+  void EventSample::AddEvent(const std::vector<unsigned long> &features, Weight weight, bool isSignal) {
 
     // First check of we have enough space for an additional event. As the number of
     // events is fixed in the constructor (to avoid time consuming reallocations)
@@ -81,7 +81,7 @@ namespace FastBDT {
     // event we store it right after the last signal event, starting at the 0 position.
     // If it's a background event, we store it right before the last added background event,
     // starting at the nEvents-1 position. We also update the weight sums and amount counts.
-    unsigned int index = 0;
+    unsigned long index = 0;
     if( isSignal ) {
       index = nSignals;
       ++nSignals;
@@ -102,7 +102,7 @@ namespace FastBDT {
     //return (nSignal*nBckgrd)/((nSignal+nBckgrd)*(nSignal+nBckgrd));
   }
 
-  CumulativeDistributions::CumulativeDistributions(const unsigned int iLayer, const EventSample &sample) {
+  CumulativeDistributions::CumulativeDistributions(const unsigned long iLayer, const EventSample &sample) {
 
     const auto &values = sample.GetValues();
     nFeatures = values.GetNFeatures();
@@ -115,7 +115,7 @@ namespace FastBDT {
 
   }
 
-  std::vector<Weight> CumulativeDistributions::CalculateCDFs(const EventSample &sample, const unsigned int firstEvent, const unsigned int lastEvent) const {
+  std::vector<Weight> CumulativeDistributions::CalculateCDFs(const EventSample &sample, const unsigned long firstEvent, const unsigned long lastEvent) const {
 
     const auto &values = sample.GetValues();
     const auto &flags = sample.GetFlags();
@@ -124,22 +124,22 @@ namespace FastBDT {
     std::vector<Weight> bins( nNodes*nBinSums[nFeatures] );
 
     // Fill Cut-PDFs for all nodes in this layer and for every feature
-    for(unsigned int iEvent = firstEvent; iEvent < lastEvent; ++iEvent) {
-      if( flags.Get(iEvent) < static_cast<int>(nNodes) )
+    for(unsigned long iEvent = firstEvent; iEvent < lastEvent; ++iEvent) {
+      if( flags.Get(iEvent) < static_cast<long>(nNodes) )
         continue;
-      const unsigned int index = (flags.Get(iEvent)-nNodes)*nBinSums[nFeatures];
-      for(unsigned int iFeature = 0; iFeature < nFeatures; ++iFeature ) {
-        const unsigned int subindex = nBinSums[iFeature] + values.Get(iEvent,iFeature);
+      const unsigned long index = (flags.Get(iEvent)-nNodes)*nBinSums[nFeatures];
+      for(unsigned long iFeature = 0; iFeature < nFeatures; ++iFeature ) {
+        const unsigned long subindex = nBinSums[iFeature] + values.Get(iEvent,iFeature);
         bins[index+subindex] += weights.GetOriginalWeight(iEvent) * (weights.GetBoostWeight(iEvent) + weights.GetFlatnessWeight(iEvent));
       }
     }
 
     // Sum up Cut-PDFs to culumative Cut-PDFs
-    for(unsigned int iNode = 0; iNode < nNodes; ++iNode) {
-      for(unsigned int iFeature = 0; iFeature < nFeatures; ++iFeature) {
+    for(unsigned long iNode = 0; iNode < nNodes; ++iNode) {
+      for(unsigned long iFeature = 0; iFeature < nFeatures; ++iFeature) {
         // Start at 2, this ignore the NaN bin at 0!
-        for(unsigned int iBin = 2; iBin < nBins[iFeature]; ++iBin) {
-          unsigned int index = iNode*nBinSums[nFeatures] + nBinSums[iFeature] + iBin;
+        for(unsigned long iBin = 2; iBin < nBins[iFeature]; ++iBin) {
+          unsigned long index = iNode*nBinSums[nFeatures] + nBinSums[iFeature] + iBin;
           bins[index] += bins[index-1];
         }
       }
@@ -148,11 +148,11 @@ namespace FastBDT {
     return bins;
   }
 
-  Cut<unsigned int> Node::CalculateBestCut(const CumulativeDistributions &CDFs) const {
+  Cut<unsigned long> Node::CalculateBestCut(const CumulativeDistributions &CDFs) const {
 
-    Cut<unsigned int> cut;
+    Cut<unsigned long> cut;
 
-    const unsigned int nFeatures = CDFs.GetNFeatures();
+    const unsigned long nFeatures = CDFs.GetNFeatures();
     const auto& nBins = CDFs.GetNBins();
 
     Weight currentLoss = LossFunction(signal, bckgrd);
@@ -160,9 +160,9 @@ namespace FastBDT {
       return cut;
 
     // Loop over all features and cuts and sum up signal and background histograms to cumulative histograms
-    for(unsigned int iFeature = 0; iFeature < nFeatures; ++iFeature) {
+    for(unsigned long iFeature = 0; iFeature < nFeatures; ++iFeature) {
       // Start at 2, this ignores the NaN bin at 0
-      for(unsigned int iCut = 2; iCut < nBins[iFeature]; ++iCut) {
+      for(unsigned long iCut = 2; iCut < nBins[iFeature]; ++iCut) {
         Weight s = CDFs.GetSignal(iNode, iFeature, iCut-1);
         Weight b = CDFs.GetBckgrd(iNode, iFeature, iCut-1);
         Weight currentGain = currentLoss - LossFunction( signal-s, bckgrd-b ) - LossFunction( s, b );
@@ -235,18 +235,18 @@ namespace FastBDT {
    * In bin-space NaN is marked by bin 0
    */
   template<>
-  bool is_nan(const unsigned int &value) {
+  bool is_nan(const unsigned long &value) {
     return value == 0;
   }
 
 
-  TreeBuilder::TreeBuilder(unsigned int nLayers, EventSample &sample) : nLayers(nLayers) {
+  TreeBuilder::TreeBuilder(unsigned long nLayers, EventSample &sample) : nLayers(nLayers) {
 
-    const unsigned int nNodes = 1 << nLayers;
+    const unsigned long nNodes = 1 << nLayers;
     cuts.resize(nNodes - 1);
 
-    for(unsigned int iLayer = 0; iLayer <= nLayers; ++iLayer) {
-      for(unsigned int iNode = 0; iNode < static_cast<unsigned int>(1<<iLayer); ++iNode) {
+    for(unsigned long iLayer = 0; iLayer <= nLayers; ++iLayer) {
+      for(unsigned long iNode = 0; iNode < static_cast<unsigned long>(1<<iLayer); ++iNode) {
         nodes.push_back( Node(iLayer, iNode) );
       }
     }
@@ -269,7 +269,7 @@ namespace FastBDT {
 
     // The training of the tree is done level by level. So we iterate over the levels of the tree
     // and create histograms for signal and background events for different cuts, nodes and features.
-    for(unsigned int iLayer = 0; iLayer < nLayers; ++iLayer) {
+    for(unsigned long iLayer = 0; iLayer < nLayers; ++iLayer) {
 
       CumulativeDistributions CDFs(iLayer, sample);
       UpdateCuts(CDFs, iLayer);
@@ -280,7 +280,7 @@ namespace FastBDT {
 
   }
 
-  void TreeBuilder::UpdateCuts(const CumulativeDistributions &CDFs, unsigned int iLayer) {
+  void TreeBuilder::UpdateCuts(const CumulativeDistributions &CDFs, unsigned long iLayer) {
 
     for(auto &node : nodes) {
       if( node.IsInLayer(iLayer) ) {
@@ -294,16 +294,16 @@ namespace FastBDT {
     auto &flags = sample.GetFlags();
     const auto &values = sample.GetValues();
     // Iterate over all signal events, and update weights in each node of the next level according to the cuts.
-    for(unsigned int iEvent = 0; iEvent < sample.GetNEvents(); ++iEvent) {
+    for(unsigned long iEvent = 0; iEvent < sample.GetNEvents(); ++iEvent) {
 
-      const int flag = flags.Get(iEvent);
+      const long flag = flags.Get(iEvent);
       if( flag <= 0)
         continue;
       auto &cut = cuts[flag-1];
       if( not cut.valid )
         continue;
 
-      const unsigned int index = values.Get(iEvent, cut.feature );
+      const unsigned long index = values.Get(iEvent, cut.feature );
       // If NaN value we throw out the event, but remeber its current node using the a negative flag!
       if( index == 0 ) {
         flags.Set(iEvent, -flag);
@@ -315,21 +315,21 @@ namespace FastBDT {
     }
   }
 
-  void TreeBuilder::UpdateEvents(const EventSample &sample, unsigned int iLayer) {
+  void TreeBuilder::UpdateEvents(const EventSample &sample, unsigned long iLayer) {
 
-    const unsigned int nNodes = (1 << iLayer);
+    const unsigned long nNodes = (1 << iLayer);
     const auto &weights = sample.GetWeights();
     const auto &flags = sample.GetFlags();
 
-    for(unsigned int iEvent = 0; iEvent < sample.GetNSignals(); ++iEvent) {
-      const int flag = flags.Get(iEvent);
-      if( flag >= static_cast<int>(nNodes) ) {
+    for(unsigned long iEvent = 0; iEvent < sample.GetNSignals(); ++iEvent) {
+      const long flag = flags.Get(iEvent);
+      if( flag >= static_cast<long>(nNodes) ) {
         nodes[flag-1].AddSignalWeight( weights.GetBoostWeight(iEvent), weights.GetOriginalWeight(iEvent) );
       }
     }
-    for(unsigned int iEvent = sample.GetNSignals(); iEvent < sample.GetNEvents(); ++iEvent) {
-      const int flag = flags.Get(iEvent);
-      if( flag >= static_cast<int>(nNodes) ) {
+    for(unsigned long iEvent = sample.GetNSignals(); iEvent < sample.GetNEvents(); ++iEvent) {
+      const long flag = flags.Get(iEvent);
+      if( flag >= static_cast<long>(nNodes) ) {
         nodes[flag-1].AddBckgrdWeight( weights.GetBoostWeight(iEvent), weights.GetOriginalWeight(iEvent) );
       }
     }
@@ -357,7 +357,7 @@ namespace FastBDT {
     std::cout << "Finished Printing Tree" << std::endl;
   }
 
-  ForestBuilder::ForestBuilder(EventSample &sample, unsigned int nTrees, double shrinkage, double randRatio, unsigned int nLayersPerTree, bool sPlot, double flatnessLoss) : shrinkage(shrinkage), flatnessLoss(flatnessLoss) {
+  ForestBuilder::ForestBuilder(EventSample &sample, unsigned long nTrees, double shrinkage, double randRatio, unsigned long nLayersPerTree, bool sPlot, double flatnessLoss) : shrinkage(shrinkage), flatnessLoss(flatnessLoss) {
 
     auto &weights = sample.GetWeights();
     sums = weights.GetSums(sample.GetNSignals()); 
@@ -368,11 +368,11 @@ namespace FastBDT {
     // Apply F0 to original_weights because F0 is not a boost_weight, otherwise prior probability in case of
     // Events with missing values is wrong.
     if (F0 != 0.0) {
-        const unsigned int nEvents = sample.GetNEvents();
-        const unsigned int nSignals = sample.GetNSignals();
-        for(unsigned int iEvent = 0; iEvent < nSignals; ++iEvent)
+        const unsigned long nEvents = sample.GetNEvents();
+        const unsigned long nSignals = sample.GetNSignals();
+        for(unsigned long iEvent = 0; iEvent < nSignals; ++iEvent)
           weights.SetOriginalWeight(iEvent, 2.0 * sums[1] / (sums[0] + sums[1]) * weights.GetOriginalWeight(iEvent));
-        for(unsigned int iEvent = nSignals; iEvent < nEvents; ++iEvent)
+        for(unsigned long iEvent = nSignals; iEvent < nEvents; ++iEvent)
           weights.SetOriginalWeight(iEvent, 2.0 * sums[0] / (sums[0] + sums[1]) * weights.GetOriginalWeight(iEvent));
     }
         
@@ -389,8 +389,8 @@ namespace FastBDT {
         auto nFeatures = values.GetNFeatures();
         auto nSpectators = values.GetNSpectators();
         auto &nBins = values.GetNBins();
-        const unsigned int nEvents = sample.GetNEvents();
-        const unsigned int nSignals = sample.GetNSignals();
+        const unsigned long nEvents = sample.GetNEvents();
+        const unsigned long nSignals = sample.GetNSignals();
 
         signal_event_index_sorted_by_F.resize(nSignals);
         bckgrd_event_index_sorted_by_F.resize(nEvents - nSignals);
@@ -398,14 +398,14 @@ namespace FastBDT {
         uniform_bin_weight_signal.resize(nSpectators);
         uniform_bin_weight_bckgrd.resize(nSpectators);
         weight_below_current_F_per_uniform_bin.resize(nSpectators);
-        for(unsigned int iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
+        for(unsigned long iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
           uniform_bin_weight_signal[iSpectator].resize(nBins[nFeatures + iSpectator], 0.0);
           uniform_bin_weight_bckgrd[iSpectator].resize(nBins[nFeatures + iSpectator], 0.0);
           weight_below_current_F_per_uniform_bin[iSpectator].resize(nBins[nFeatures + iSpectator], 0.0);
         }
           
-        for(unsigned int iEvent = 0; iEvent < nEvents; ++iEvent) {
-          for(unsigned int iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
+        for(unsigned long iEvent = 0; iEvent < nEvents; ++iEvent) {
+          for(unsigned long iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
             const uint64_t uniformBin = values.GetSpectator(iEvent, iSpectator);
             if (iEvent < nSignals)
               uniform_bin_weight_signal[iSpectator][uniformBin] += weights.GetOriginalWeight(iEvent);
@@ -413,7 +413,7 @@ namespace FastBDT {
               uniform_bin_weight_bckgrd[iSpectator][uniformBin] += weights.GetOriginalWeight(iEvent);
           }
         }
-        for(unsigned int iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
+        for(unsigned long iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
           for(uint64_t iUniformBin = 0; iUniformBin < uniform_bin_weight_signal[iSpectator].size(); ++iUniformBin) {
               uniform_bin_weight_signal[iSpectator][iUniformBin] /= sums[0];
           }
@@ -424,7 +424,7 @@ namespace FastBDT {
     }
 
     // Now train config.nTrees!
-    for(unsigned int iTree = 0; iTree < nTrees; ++iTree) {
+    for(unsigned long iTree = 0; iTree < nTrees; ++iTree) {
 
       // Update the event weights according to their F value
       updateEventWeights(sample);
@@ -439,7 +439,7 @@ namespace FastBDT {
       // Create and train a new train on the sample
       TreeBuilder builder(nLayersPerTree, sample);
       if(builder.IsValid()) {
-        forest.push_back( Tree<unsigned int>( builder.GetCuts(), builder.GetNEntries(), builder.GetPurities(), builder.GetBoostWeights() ) );
+        forest.push_back( Tree<unsigned long>( builder.GetCuts(), builder.GetNEntries(), builder.GetPurities(), builder.GetBoostWeights() ) );
       } else {
         std::cerr << "Terminated boosting at tree " << iTree << " out of " << nTrees << std::endl;
         std::cerr << "Because the last tree was not valid, meaning it couldn't find an optimal cut." << std::endl;
@@ -455,21 +455,21 @@ namespace FastBDT {
     // Draw a random sample if stochastic gradient boost is used
     // Draw random number [0,1) and compare it to the given ratio. If bigger disable this event by flagging it with 0.
     // If smaller set the flag to 1. This is important! If the flags are != 1, the DecisionTree algorithm will fail.
-    const unsigned int nEvents = sample.GetNEvents();
+    const unsigned long nEvents = sample.GetNEvents();
     auto &flags = sample.GetFlags();
     if( randRatio < 1.0 and sPlot) {
       // For an sPlot Training it is important to take always signal and background pairs together into the training!
-      for(unsigned int iEvent = 0; iEvent < nEvents / 2 + 1; ++iEvent) {
-        int use = (static_cast<float>(rand())/static_cast<float>(RAND_MAX) > randRatio ) ? 0 : 1;
+      for(unsigned long iEvent = 0; iEvent < nEvents / 2 + 1; ++iEvent) {
+        long use = (static_cast<float>(rand())/static_cast<float>(RAND_MAX) > randRatio ) ? 0 : 1;
         flags.Set(iEvent, use);
-        unsigned int jEvent = static_cast<unsigned int>(static_cast<int>(nEvents) - static_cast<int>(iEvent) - 1);
+        unsigned long jEvent = static_cast<unsigned long>(static_cast<long>(nEvents) - static_cast<long>(iEvent) - 1);
         flags.Set(jEvent, use);
       }
     } else if( randRatio < 1.0) {
-      for(unsigned int iEvent = 0; iEvent < nEvents; ++iEvent)
+      for(unsigned long iEvent = 0; iEvent < nEvents; ++iEvent)
         flags.Set(iEvent, ( static_cast<float>(rand())/static_cast<float>(RAND_MAX) > randRatio ) ? 0 : 1 );
     } else {
-      for(unsigned int iEvent = 0; iEvent < nEvents; ++iEvent)
+      for(unsigned long iEvent = 0; iEvent < nEvents; ++iEvent)
         flags.Set(iEvent, 1);
     }
 
@@ -477,8 +477,8 @@ namespace FastBDT {
 
   void ForestBuilder::updateEventWeights(EventSample &eventSample) {
 
-    const unsigned int nEvents = eventSample.GetNEvents();
-    const unsigned int nSignals = eventSample.GetNSignals();
+    const unsigned long nEvents = eventSample.GetNEvents();
+    const unsigned long nSignals = eventSample.GetNSignals();
 
     const auto &flags = eventSample.GetFlags();
     const auto &values = eventSample.GetValues();
@@ -488,7 +488,7 @@ namespace FastBDT {
     // If the event wasn't disabled, we can use the flag directly to determine the node of this event
     // If not we have to calculate the node to which this event belongs
     if( forest.size() > 0 ) {
-      for(unsigned int iEvent = 0; iEvent < nEvents; ++iEvent) {
+      for(unsigned long iEvent = 0; iEvent < nEvents; ++iEvent) {
         if( flags.Get(iEvent) != 0)
           FCache[iEvent] += shrinkage*forest.back().GetBoostWeight( std::abs(flags.Get(iEvent)) - 1);
         else
@@ -496,17 +496,17 @@ namespace FastBDT {
       }
     }
 
-    for(unsigned int iEvent = 0; iEvent < nSignals; ++iEvent)
+    for(unsigned long iEvent = 0; iEvent < nSignals; ++iEvent)
       weights.SetBoostWeight(iEvent, 2.0/(1.0+std::exp(2.0*FCache[iEvent])));
-    for(unsigned int iEvent = nSignals; iEvent < nEvents; ++iEvent)
+    for(unsigned long iEvent = nSignals; iEvent < nEvents; ++iEvent)
       weights.SetBoostWeight(iEvent, 2.0/(1.0+std::exp(-2.0*FCache[iEvent])));
 
   }
   
   void ForestBuilder::updateEventWeightsWithFlatnessPenalty(EventSample &eventSample) {
 
-    const unsigned int nEvents = eventSample.GetNEvents();
-    const unsigned int nSignals = eventSample.GetNSignals();
+    const unsigned long nEvents = eventSample.GetNEvents();
+    const unsigned long nSignals = eventSample.GetNSignals();
 
     const auto &values = eventSample.GetValues();
     auto &weights = eventSample.GetWeights();
@@ -514,10 +514,10 @@ namespace FastBDT {
     auto nSpectators = values.GetNSpectators();
     
     // Sort events in order of increasing F Value
-    for(unsigned int iEvent = 0; iEvent < nSignals; ++iEvent) {
+    for(unsigned long iEvent = 0; iEvent < nSignals; ++iEvent) {
         signal_event_index_sorted_by_F[iEvent] = {FCache[iEvent], iEvent};
     }
-    for(unsigned int iEvent = 0; iEvent < nEvents-nSignals; ++iEvent) {
+    for(unsigned long iEvent = 0; iEvent < nEvents-nSignals; ++iEvent) {
         bckgrd_event_index_sorted_by_F[iEvent] = {-FCache[iEvent+nSignals], iEvent+nSignals};
     }
 
@@ -534,14 +534,14 @@ namespace FastBDT {
     }
 
     double global_weight_below_current_F = 0;
-    for(unsigned int iIndex = 0; iIndex < signal_event_index_sorted_by_F.size(); ++iIndex) {
-        unsigned int iEvent = signal_event_index_sorted_by_F[iIndex].index;
+    for(unsigned long iIndex = 0; iIndex < signal_event_index_sorted_by_F.size(); ++iIndex) {
+        unsigned long iEvent = signal_event_index_sorted_by_F[iIndex].index;
           
         global_weight_below_current_F += weights.GetOriginalWeight(iEvent);
         double F = global_weight_below_current_F / sums[0];
         double fw = 0.0;
 
-        for(unsigned int iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
+        for(unsigned long iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
           const uint64_t uniformBin = values.GetSpectator(iEvent, iSpectator);
           weight_below_current_F_per_uniform_bin[iSpectator][uniformBin] += weights.GetOriginalWeight(iEvent);
           double F_bin = weight_below_current_F_per_uniform_bin[iSpectator][uniformBin] / (uniform_bin_weight_signal[iSpectator][uniformBin] * sums[0]);
@@ -553,7 +553,7 @@ namespace FastBDT {
 
     }
 
-    for(unsigned int iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
+    for(unsigned long iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
       for(uint64_t iUniformBin = 0; iUniformBin < weight_below_current_F_per_uniform_bin[iSpectator].size(); ++iUniformBin) {
         weight_below_current_F_per_uniform_bin[iSpectator][iUniformBin] = 0.0;
       }
@@ -561,14 +561,14 @@ namespace FastBDT {
     
     global_weight_below_current_F = 0;
     
-    for(unsigned int iIndex = 0; iIndex < bckgrd_event_index_sorted_by_F.size(); ++iIndex) {
-        unsigned int iEvent = bckgrd_event_index_sorted_by_F[iIndex].index;
+    for(unsigned long iIndex = 0; iIndex < bckgrd_event_index_sorted_by_F.size(); ++iIndex) {
+        unsigned long iEvent = bckgrd_event_index_sorted_by_F[iIndex].index;
           
         global_weight_below_current_F += weights.GetOriginalWeight(iEvent);
         double F = global_weight_below_current_F / sums[1];
         double fw = 0.0;
 
-        for(unsigned int iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
+        for(unsigned long iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
           const uint64_t uniformBin = values.GetSpectator(iEvent, iSpectator);
           weight_below_current_F_per_uniform_bin[iSpectator][uniformBin] += weights.GetOriginalWeight(iEvent);
           double F_bin = weight_below_current_F_per_uniform_bin[iSpectator][uniformBin] / (uniform_bin_weight_bckgrd[iSpectator][uniformBin] * sums[1]);
@@ -580,7 +580,7 @@ namespace FastBDT {
 
     }
 
-    for(unsigned int iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
+    for(unsigned long iSpectator = 0; iSpectator < nSpectators; ++iSpectator) {
       for(uint64_t iUniformBin = 0; iUniformBin < weight_below_current_F_per_uniform_bin[iSpectator].size(); ++iUniformBin) {
         weight_below_current_F_per_uniform_bin[iSpectator][iUniformBin] = 0.0;
       }

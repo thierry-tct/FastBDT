@@ -67,7 +67,7 @@
 
 class Data {
   public:
-    Data(std::string datafile, unsigned int _numberOfFeatures, unsigned int _numberOfEvents) : numberOfFeatures(_numberOfFeatures), numberOfEvents(_numberOfEvents) {
+    Data(std::string datafile, unsigned long _numberOfFeatures, unsigned long _numberOfEvents) : numberOfFeatures(_numberOfFeatures), numberOfEvents(_numberOfEvents) {
 
       X.reserve(numberOfEvents);
       y.reserve(numberOfEvents);
@@ -78,20 +78,20 @@ class Data {
       // Skip Header
       std::getline(fs, line);
 
-      unsigned int iEvent = 0;
+      unsigned long iEvent = 0;
       while(std::getline(fs, line)) {
 
         std::istringstream sin(line);
         std::vector<float> row;
         float value = 0;
-        unsigned int iFeature = 0;
+        unsigned long iFeature = 0;
         while(sin >> value) {
           if(iFeature < numberOfFeatures)
             row.push_back(value);
           ++iFeature;
         }
         X.push_back(row);
-        y.push_back(static_cast<int>(value));
+        y.push_back(static_cast<long>(value));
 
         ++iEvent;
         if(iEvent >= numberOfEvents) {
@@ -102,22 +102,22 @@ class Data {
       std::cout << "Loaded " << iEvent << " Events" << std::endl;
     }
 
-    unsigned int numberOfEvents = 0;
-    unsigned int numberOfFeatures = 0;
+    unsigned long numberOfEvents = 0;
+    unsigned long numberOfFeatures = 0;
     std::vector<std::vector<float>> X;
-    std::vector<unsigned int> y;
+    std::vector<unsigned long> y;
 };
 
 
 struct Config {
-    unsigned int nTrees;
-    unsigned int depth;
+    unsigned long nTrees;
+    unsigned long depth;
     double shrinkage;
     double subSampling;
     // Only TMVA and FastBDT
-    unsigned int nCutLevels;
-    unsigned int numberOfFeatures;
-    unsigned int numberOfEvents;
+    unsigned long nCutLevels;
+    unsigned long numberOfFeatures;
+    unsigned long numberOfEvents;
 };
 
 struct Result {
@@ -159,7 +159,7 @@ void writeResults(std::string filename, const std::vector<Result> &results, cons
   }
   str << std::endl;
 
-  for(unsigned int iEvent = 0; iEvent < config.numberOfEvents;  ++iEvent) {
+  for(unsigned long iEvent = 0; iEvent < config.numberOfEvents;  ++iEvent) {
     for(auto &r : results) {
         str << r.probabilities[iEvent] << " ";
     }
@@ -200,8 +200,8 @@ Result measureSKLearn(const Data& train, const Data& test, const Config& config)
     
     float *X = new float[train.numberOfEvents*train.numberOfFeatures];
     float *y = new float[train.numberOfEvents];
-    for(unsigned int iEvent = 0; iEvent < train.numberOfEvents; ++iEvent) {
-        for(unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature)
+    for(unsigned long iEvent = 0; iEvent < train.numberOfEvents; ++iEvent) {
+        for(unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature)
             X[iEvent*train.numberOfFeatures + iFeature] = train.X[iEvent][iFeature];
         y[iEvent] = static_cast<float>(train.y[iEvent]);
     }
@@ -224,15 +224,15 @@ Result measureSKLearn(const Data& train, const Data& test, const Config& config)
     
     std::chrono::high_resolution_clock::time_point testTime1 = std::chrono::high_resolution_clock::now();
     float *X_test = new float[test.numberOfEvents*test.numberOfFeatures];
-    for(unsigned int iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
-        for(unsigned int iFeature = 0; iFeature < test.numberOfFeatures; ++iFeature)
+    for(unsigned long iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
+        for(unsigned long iFeature = 0; iFeature < test.numberOfFeatures; ++iFeature)
             X_test[iEvent*test.numberOfFeatures + iFeature] = test.X[iEvent][iFeature];
     }
     long dimensions_X_test[2] = {test.numberOfEvents, test.numberOfFeatures};
     PyObject* ndarray_X_test = PyArray_SimpleNewFromData(2, dimensions_X_test, NPY_FLOAT32, X_test);
 
     PyObject *pyresult = PyObject_CallMethodObjArgs(forest, predict, ndarray_X_test, NULL);
-    for(unsigned int iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
+    for(unsigned long iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
         result.probabilities[iEvent] = 1.0 - static_cast<float>(*static_cast<double*>(PyArray_GETPTR1(pyresult, iEvent)));
     }
     std::chrono::high_resolution_clock::time_point testTime2 = std::chrono::high_resolution_clock::now();
@@ -264,17 +264,17 @@ Result measureFastBDT(const Data& train, const Data& test, const Config& config)
     // Equal statistics binning
     std::vector<FastBDT::FeatureBinning<float>> featureBinnings(train.numberOfFeatures);
     std::vector<float> feature(train.numberOfEvents);
-    for(unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
-        for(unsigned int iEvent = 0; iEvent < train.numberOfEvents; ++iEvent)
+    for(unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
+        for(unsigned long iEvent = 0; iEvent < train.numberOfEvents; ++iEvent)
           feature[iEvent] = train.X[iEvent][iFeature];
         featureBinnings[iFeature] = FastBDT::FeatureBinning<float>(config.nCutLevels, feature);
     }
 
     // Fill event Sample
-    FastBDT::EventSample eventSample(train.numberOfEvents, train.numberOfFeatures, 0, std::vector<unsigned int>(train.numberOfFeatures, config.nCutLevels));
-    std::vector<unsigned int> bins(train.numberOfFeatures);
-    for(unsigned int iEvent = 0; iEvent < train.numberOfEvents; ++iEvent) {
-        for(unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature)
+    FastBDT::EventSample eventSample(train.numberOfEvents, train.numberOfFeatures, 0, std::vector<unsigned long>(train.numberOfFeatures, config.nCutLevels));
+    std::vector<unsigned long> bins(train.numberOfFeatures);
+    for(unsigned long iEvent = 0; iEvent < train.numberOfEvents; ++iEvent) {
+        for(unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature)
             bins[iFeature] = featureBinnings[iFeature].ValueToBin( train.X[iEvent][iFeature] );
         eventSample.AddEvent(bins, 1.0, train.y[iEvent] == 1);
     }
@@ -296,7 +296,7 @@ Result measureFastBDT(const Data& train, const Data& test, const Config& config)
     
     // Apply classifier on test data
     std::chrono::high_resolution_clock::time_point testTime1 = std::chrono::high_resolution_clock::now();
-    for(unsigned int iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
+    for(unsigned long iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
       result.probabilities[iEvent] = forest.Analyse(test.X[iEvent]);
     }
     std::chrono::high_resolution_clock::time_point testTime2 = std::chrono::high_resolution_clock::now();
@@ -321,22 +321,22 @@ Result measureTMVA(const Data& train, const Data& test, const Config& config) {
     std::vector<std::string> variables = {"M", "p", "pt", "pz", "phi", "daughter__bo0__cm__spp__bc",       "daughter__bo0__cm__sppz__bc", "daughter__bo0__cm__sppt__bc",       "daughter__bo0__cm__spphi__bc", "daughter__bo1__cm__spp__bc",       "daughter__bo1__cm__sppz__bc", "daughter__bo1__cm__sppt__bc",       "daughter__bo1__cm__spphi__bc", "daughter__bo2__cm__spp__bc",       "daughter__bo2__cm__sppz__bc", "daughter__bo2__cm__sppt__bc",       "daughter__bo2__cm__spphi__bc", "chiProb", "dr", "dz", "dphi",       "daughter__bo0__cm__spdr__bc", "daughter__bo1__cm__spdr__bc",       "daughter__bo0__cm__spdz__bc", "daughter__bo1__cm__spdz__bc",       "daughter__bo0__cm__spdphi__bc", "daughter__bo1__cm__spdphi__bc",       "daughter__bo0__cm__spchiProb__bc", "daughter__bo1__cm__spchiProb__bc",       "daughter__bo2__cm__spchiProb__bc", "daughter__bo0__cm__spKid__bc",       "daughter__bo0__cm__sppiid__bc", "daughter__bo1__cm__spKid__bc",       "daughter__bo1__cm__sppiid__bc", "daughterAngle__bo0__cm__sp1__bc",       "daughterAngle__bo0__cm__sp2__bc", "daughterAngle__bo1__cm__sp2__bc",       "daughter__bo2__cm__spdaughter__bo0__cm__spE__bc__bc",       "daughter__bo2__cm__spdaughter__bo1__cm__spE__bc__bc",       "daughter__bo2__cm__spdaughter__bo0__cm__spclusterTiming__bc__bc",       "daughter__bo2__cm__spdaughter__bo1__cm__spclusterTiming__bc__bc",       "daughter__bo2__cm__spdaughter__bo0__cm__spclusterE9E25__bc__bc",       "daughter__bo2__cm__spdaughter__bo1__cm__spclusterE9E25__bc__bc",       "daughter__bo2__cm__spdaughter__bo0__cm__spminC2HDist__bc__bc",       "daughter__bo2__cm__spdaughter__bo1__cm__spminC2HDist__bc__bc",       "daughterInvariantMass__bo0__cm__sp1__bc",       "daughterInvariantMass__bo0__cm__sp2__bc",       "daughterInvariantMass__bo1__cm__sp2__bc"};
 
     std::vector<float> vec(train.numberOfFeatures);
-    for(unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
+    for(unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
       data_loader.AddVariable(variables[iFeature].c_str());
     }
 
     TTree *signal_tree = new TTree("signal_tree", "signal_tree");
     TTree *background_tree = new TTree("background_tree", "background_tree");
 
-    for (unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
+    for (unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
       signal_tree->Branch(variables[iFeature].c_str(), &vec[iFeature]);
       background_tree->Branch(variables[iFeature].c_str(), &vec[iFeature]);
     }
 
-    unsigned int nsig = 0;
-    unsigned int nbkg = 0;
-    for(unsigned int iEvent = 0; iEvent < train.numberOfEvents; ++iEvent) {
-      for(unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
+    unsigned long nsig = 0;
+    unsigned long nbkg = 0;
+    for(unsigned long iEvent = 0; iEvent < train.numberOfEvents; ++iEvent) {
+      for(unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
         vec[iFeature] = train.X[iEvent][iFeature];
       }
       if(train.y[iEvent] == 1) {
@@ -355,7 +355,7 @@ Result measureTMVA(const Data& train, const Data& test, const Config& config) {
     factory.BookMethod(&data_loader, TMVA::Types::kBDT, "BDTG", std::string("!H:!V:NTrees=") + std::to_string(config.nTrees) + std::string("BoostType=Grad:Shrinkage=") + std::to_string(config.shrinkage) + std::string(":UseBaggedBoost:BaggedSampleFraction=") + std::to_string(config.subSampling) + std::string(":nCuts=") + std::to_string(1 << config.nCutLevels) + std::string(":MaxDepth=") + std::to_string(config.depth) + std::string(":IgnoreNegWeightsInTraining"));
 
     TMVA::Reader *reader = new TMVA::Reader("!Color:!Silent");
-    for(unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
+    for(unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature) {
       reader->AddVariable(variables[iFeature].c_str(), &vec[iFeature]);
     }
     
@@ -377,8 +377,8 @@ Result measureTMVA(const Data& train, const Data& test, const Config& config) {
     
     // Apply classifier on test data
     std::chrono::high_resolution_clock::time_point testTime1 = std::chrono::high_resolution_clock::now();
-    for(unsigned int iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
-        for(unsigned int iFeature = 0; iFeature < test.numberOfFeatures; ++iFeature) {
+    for(unsigned long iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
+        for(unsigned long iFeature = 0; iFeature < test.numberOfFeatures; ++iFeature) {
           vec[iFeature] = test.X[iEvent][iFeature];
         }
         result.probabilities[iEvent] = (reader->EvaluateMVA("BDTG") + 1)*0.5;
@@ -403,8 +403,8 @@ Result measureXGBoost(const Data& train, const Data& test, const Config& config)
     std::chrono::high_resolution_clock::time_point preprocessingTime1 = std::chrono::high_resolution_clock::now();
     // Create XGDMatrix
     float *matrix = new float[train.numberOfEvents*train.numberOfFeatures];
-    for(unsigned int iEvent = 0; iEvent < train.numberOfEvents; ++iEvent)
-      for(unsigned int iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature)
+    for(unsigned long iEvent = 0; iEvent < train.numberOfEvents; ++iEvent)
+      for(unsigned long iFeature = 0; iFeature < train.numberOfFeatures; ++iFeature)
         matrix[iEvent*train.numberOfFeatures + iFeature] = train.X[iEvent][iFeature];
 
     DMatrixHandle dmatrix;
@@ -429,7 +429,7 @@ Result measureXGBoost(const Data& train, const Data& test, const Config& config)
     XGBoosterSetParam(booster, "tree_method", "hist");
 
     // Train classifier using training data
-    for(unsigned int iBoost = 0; iBoost < config.nTrees; ++iBoost) {
+    for(unsigned long iBoost = 0; iBoost < config.nTrees; ++iBoost) {
       XGBoosterUpdateOneIter(booster, iBoost, dmatrix);
     }
 
@@ -442,16 +442,16 @@ Result measureXGBoost(const Data& train, const Data& test, const Config& config)
     // Apply classifier on test data
     std::chrono::high_resolution_clock::time_point testTime1 = std::chrono::high_resolution_clock::now();
     float *test_matrix = new float[test.numberOfEvents*test.numberOfFeatures];
-    for(unsigned int iEvent = 0; iEvent < test.numberOfEvents; ++iEvent)
-      for(unsigned int iFeature = 0; iFeature < test.numberOfFeatures; ++iFeature)
+    for(unsigned long iEvent = 0; iEvent < test.numberOfEvents; ++iEvent)
+      for(unsigned long iFeature = 0; iFeature < test.numberOfFeatures; ++iFeature)
         test_matrix[iEvent*train.numberOfFeatures + iFeature] = test.X[iEvent][iFeature];
     DMatrixHandle test_dmatrix;
     XGDMatrixCreateFromMat(test_matrix, test.numberOfEvents, test.numberOfFeatures, NAN, &test_dmatrix);
     delete[] test_matrix;
-    long unsigned int out_len;
+    long unsigned long out_len;
     const float *out_result;
     XGBoosterPredict(booster, test_dmatrix, 0, 0, &out_len, &out_result);
-    for(unsigned int iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
+    for(unsigned long iEvent = 0; iEvent < test.numberOfEvents; ++iEvent) {
       result.probabilities[iEvent] = out_result[iEvent];
     }
     std::chrono::high_resolution_clock::time_point testTime2 = std::chrono::high_resolution_clock::now();
@@ -466,7 +466,7 @@ Result measureXGBoost(const Data& train, const Data& test, const Config& config)
 
 }
 
-void measure(Config &config, unsigned int id) {
+void measure(Config &config, unsigned long id) {
 
   std::chrono::high_resolution_clock::time_point loadTime1 = std::chrono::high_resolution_clock::now();
   Data train("data/train.csv", config.numberOfFeatures, config.numberOfEvents);
@@ -476,7 +476,7 @@ void measure(Config &config, unsigned int id) {
   std::cout << "LoadTime " << loadTime.count() << std::endl;
 
   // Repeat each measurement 5 times
-  for(unsigned int i = 0; i < 5; ++i) {
+  for(unsigned long i = 0; i < 5; ++i) {
     
     std::chrono::high_resolution_clock::time_point measureSKLearnTime1 = std::chrono::high_resolution_clock::now();
     Result resultSKLearn = measureSKLearn(train, test, config);
@@ -506,7 +506,7 @@ void measure(Config &config, unsigned int id) {
   }
 }
 
-int main(int argc, char *argv[]) {
+int main(long argc, char *argv[]) {
 
   Py_Initialize();
   import_array();
@@ -520,7 +520,7 @@ int main(int argc, char *argv[]) {
   config.numberOfEvents = 800000;
   config.numberOfFeatures = 40;
  
-  unsigned int id = atoi(argv[1]);
+  unsigned long id = atoi(argv[1]);
 
   // Here you can choose different hyper-parameters depending on the passed id
   //config.nTrees = id*10;

@@ -16,17 +16,17 @@ extern "C" {
       
     void* Create();
 
-    void SetBinning(void *ptr, unsigned int* binning, unsigned int size);
-    void SetPurityTransformation(void *ptr, bool* purityTransformation, unsigned int size);
+    void SetBinning(void *ptr, unsigned long* binning, unsigned long size);
+    void SetPurityTransformation(void *ptr, bool* purityTransformation, unsigned long size);
     
-    void SetNTrees(void *ptr, unsigned int nTrees);
-    unsigned int GetNTrees(void *ptr);
+    void SetNTrees(void *ptr, unsigned long nTrees);
+    unsigned long GetNTrees(void *ptr);
     
-    void SetDepth(void *ptr, unsigned int depth);
-    unsigned int GetDepth(void *ptr);
+    void SetDepth(void *ptr, unsigned long depth);
+    unsigned long GetDepth(void *ptr);
     
-    void SetNumberOfFlatnessFeatures(void *ptr, unsigned int numberOfFlatnessFeatures);
-    unsigned int GetNumberOfFlatnessFeatures(void *ptr);
+    void SetNumberOfFlatnessFeatures(void *ptr, unsigned long numberOfFlatnessFeatures);
+    unsigned long GetNumberOfFlatnessFeatures(void *ptr);
     
     void SetSubsample(void *ptr, double subsample);
     double GetSubsample(void *ptr);
@@ -45,27 +45,27 @@ extern "C" {
     
     void Delete(void *ptr);
     
-    void Fit(void *ptr, float *data_ptr, float *weight_ptr, bool *target_ptr, unsigned int nEvents, unsigned int nFeatures);
+    void Fit(void *ptr, float *data_ptr, float *weight_ptr, bool *target_ptr, unsigned long nEvents, unsigned long nFeatures);
 
     void Load(void* ptr, char *weightfile);
 
     float Predict(void *ptr, float *array);
 
-    void PredictArray(void *ptr, float *array, float *result, unsigned int nEvents);
+    void PredictArray(void *ptr, float *array, float *result, unsigned long nEvents);
 
     void Save(void* ptr, char *weightfile);
     
     struct VariableRanking {
-        std::map<unsigned int, double> ranking;
+        std::map<unsigned long, double> ranking;
     }; 
 
     void* GetVariableRanking(void* ptr);
     
     void* GetIndividualVariableRanking(void* ptr, float *array);
     
-    unsigned int ExtractNumberOfVariablesFromVariableRanking(void* ptr);
+    unsigned long ExtractNumberOfVariablesFromVariableRanking(void* ptr);
     
-    double ExtractImportanceOfVariableFromVariableRanking(void* ptr, unsigned int iFeature);
+    double ExtractImportanceOfVariableFromVariableRanking(void* ptr, unsigned long iFeature);
     
     void DeleteVariableRanking(void* ptr);
 

@@ -29,7 +29,7 @@ class FeatureBinningTest : public ::testing::Test {
             delete predefinedBinning;
         }
 
-        unsigned int nLevels;
+        unsigned long nLevels;
         std::vector<float> binning;
         FeatureBinning<float> *calculatedBinning;
         FeatureBinning<float> *predefinedBinning;
@@ -75,7 +75,7 @@ TEST_F(FeatureBinningTest, BinToValueExtensive4Layer ) {
     EXPECT_TRUE(std::isnan(featureBinning.BinToValue(0u)));
     EXPECT_TRUE(std::isinf(featureBinning.BinToValue(1u)));
     EXPECT_TRUE(featureBinning.BinToValue(1u) < 0.0f);
-    for(unsigned int i = 1; i < test_inverse_binning.size() - 1; ++i) {
+    for(unsigned long i = 1; i < test_inverse_binning.size() - 1; ++i) {
         EXPECT_EQ(featureBinning.BinToValue(i + 1u), test_inverse_binning[i]);
     }
 
@@ -287,7 +287,7 @@ class WeightedFeatureBinningTest : public ::testing::Test {
             delete predefinedBinning;
         }
 
-        unsigned int nLevels;
+        unsigned long nLevels;
         std::vector<float> binning;
         WeightedFeatureBinning<float> *calculatedBinning;
         FeatureBinning<float> *predefinedBinning;
@@ -358,7 +358,7 @@ class EquidistantFeatureBinningTest : public ::testing::Test {
             delete calculatedBinning;
         }
 
-        unsigned int nLevels;
+        unsigned long nLevels;
         std::vector<float> binning;
         EquidistantFeatureBinning<float> *calculatedBinning;
 
@@ -418,7 +418,7 @@ class PurityTransformationTest : public ::testing::Test {
         virtual void TearDown() {
         }
 
-        std::vector<unsigned int> binned_data;
+        std::vector<unsigned long> binned_data;
         std::vector<float> weights;
         std::vector<bool> isSignal;
 
@@ -441,7 +441,7 @@ class EventWeightsTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
             eventWeights = new EventWeights(10);
-            for(unsigned int i = 0; i < 10; ++i) {
+            for(unsigned long i = 0; i < 10; ++i) {
                 eventWeights->SetBoostWeight(i, static_cast<Weight>(i+1));
                 eventWeights->SetOriginalWeight(i, 2);
             }
@@ -468,7 +468,7 @@ TEST_F(EventWeightsTest, WeightSumsAreNotInfluencedByZeroWeights) {
     auto sums = eventWeights->GetSums(5);
             
     EventWeights *newEventWeights = new EventWeights(20);
-    for(unsigned int i = 0; i < 10; ++i) {
+    for(unsigned long i = 0; i < 10; ++i) {
         // Get delivers the weight*original weight, therefore we need to divide by the original weight afterwards
         newEventWeights->SetBoostWeight(i*2, eventWeights->GetBoostWeight(i));
         newEventWeights->SetOriginalWeight(i*2, eventWeights->GetOriginalWeight(i));
@@ -486,7 +486,7 @@ TEST_F(EventWeightsTest, WeightSumsAreNotInfluencedByZeroWeights) {
 
 TEST_F(EventWeightsTest, GetterIsCorrect) {
 
-    for(unsigned int i = 0; i < 10; ++i) {
+    for(unsigned long i = 0; i < 10; ++i) {
         EXPECT_FLOAT_EQ( eventWeights->Get(i), static_cast<Weight>(i+1) * 2); 
     }
     
@@ -494,7 +494,7 @@ TEST_F(EventWeightsTest, GetterIsCorrect) {
 
 TEST_F(EventWeightsTest, WeightSumsAndGetterAreCorrectlyUpdated) {
 
-    for(unsigned int i = 0; i < 10; ++i) {
+    for(unsigned long i = 0; i < 10; ++i) {
         eventWeights->SetBoostWeight(i, static_cast<Weight>(i+3));
     }
 
@@ -503,7 +503,7 @@ TEST_F(EventWeightsTest, WeightSumsAndGetterAreCorrectlyUpdated) {
     EXPECT_FLOAT_EQ(sums[1], 50.0 * 2);
     EXPECT_FLOAT_EQ(sums[2], 645.0 * 2);
     
-    for(unsigned int i = 0; i < 10; ++i) {
+    for(unsigned long i = 0; i < 10; ++i) {
         EXPECT_FLOAT_EQ( eventWeights->Get(i), static_cast<Weight>(i+3) * 2); 
     }
 
@@ -525,18 +525,18 @@ class EventFlagsTest : public ::testing::Test {
 
 TEST_F(EventFlagsTest, IsInitialisedWithOnes) {
 
-    for(unsigned int i = 0; i < 10; ++i)
+    for(unsigned long i = 0; i < 10; ++i)
         EXPECT_EQ( eventFlags->Get(i), 1);
 
 }
 
 TEST_F(EventFlagsTest, SetterAndGetterWorkCorrectly) {
     
-    for(unsigned int i = 0; i < 10; ++i)
+    for(unsigned long i = 0; i < 10; ++i)
         eventFlags->Set(i, i-5 );
 
-    for(unsigned int i = 0; i < 10; ++i)
-        EXPECT_EQ( eventFlags->Get(i), static_cast<int>(i)-5);
+    for(unsigned long i = 0; i < 10; ++i)
+        EXPECT_EQ( eventFlags->Get(i), static_cast<long>(i)-5);
 
 }
 
@@ -556,17 +556,17 @@ class EventValuesTest : public ::testing::Test {
 
 TEST_F(EventValuesTest, SetterAndGetterWorkCorrectly) {
     
-    for(unsigned int i = 0; i < 8; ++i) {
-        std::vector<unsigned int> features = { i, static_cast<unsigned int>(4 + (1-2*((int)i%2))*((int)i+1)/2), static_cast<unsigned int>((int)(i) % 4 + 1),  7-i, i };
+    for(unsigned long i = 0; i < 8; ++i) {
+        std::vector<unsigned long> features = { i, static_cast<unsigned long>(4 + (1-2*((long)i%2))*((long)i+1)/2), static_cast<unsigned long>((long)(i) % 4 + 1),  7-i, i };
         eventValues->Set(i, features);
     }
     EXPECT_THROW( eventValues->Set(1, {1,2,3,4,5,6}), std::runtime_error );
     EXPECT_THROW( eventValues->Set(1, {1,20,3,1,1}), std::runtime_error );
     
-    for(unsigned int i = 0; i < 8; ++i) {
-        std::vector<unsigned int> features = { i, static_cast<unsigned int>(4 + (1-2*((int)(i)%2))*((int)(i)+1)/2), static_cast<unsigned int>((int)(i) % 4 + 1),  7-i, i };
+    for(unsigned long i = 0; i < 8; ++i) {
+        std::vector<unsigned long> features = { i, static_cast<unsigned long>(4 + (1-2*((long)(i)%2))*((long)(i)+1)/2), static_cast<unsigned long>((long)(i) % 4 + 1),  7-i, i };
         const auto *array = &eventValues->Get(i);
-        for(unsigned int j = 0; j < 3; ++j) {
+        for(unsigned long j = 0; j < 3; ++j) {
             EXPECT_EQ( eventValues->Get(i,j), features[j]);
             EXPECT_EQ( array[j], features[j]);
         }
@@ -624,7 +624,7 @@ class EventSampleTest : public ::testing::Test {
 
 TEST_F(EventSampleTest, AddingEventsWorksCorrectly) {
 
-    eventSample->AddEvent( std::vector<unsigned int>({1,2,3,4}), 2.0, true );
+    eventSample->AddEvent( std::vector<unsigned long>({1,2,3,4}), 2.0, true );
     EXPECT_EQ( eventSample->GetNSignals(), 1u);
     EXPECT_EQ( eventSample->GetNBckgrds(), 0u);
    
@@ -635,8 +635,8 @@ TEST_F(EventSampleTest, AddingEventsWorksCorrectly) {
 
  
     // Add some more Signal and Background events   
-    for(unsigned int i = 1; i < 10; ++i) { 
-        eventSample->AddEvent( std::vector<unsigned int>({2*i,3*i,5*i,1}), 2.0, i % 2 == 0 );
+    for(unsigned long i = 1; i < 10; ++i) { 
+        eventSample->AddEvent( std::vector<unsigned long>({2*i,3*i,5*i,1}), 2.0, i % 2 == 0 );
     }
     EXPECT_EQ( eventSample->GetNSignals(), 5u);
     EXPECT_EQ( eventSample->GetNBckgrds(), 5u);
@@ -654,21 +654,21 @@ TEST_F(EventSampleTest, AddingEventsWorksCorrectly) {
     EXPECT_EQ( eventSample->GetValues().Get(9,0), 2u); 
 
     // Test if signal and background labels are correctly assigned
-    for(unsigned int i = 0; i < 5; ++i) {
+    for(unsigned long i = 0; i < 5; ++i) {
         EXPECT_TRUE( eventSample->IsSignal(i));
         EXPECT_FALSE( eventSample->IsSignal(i+5));
     }
 
     // Test throw if number of promised events is exceeded
-    EXPECT_THROW( eventSample->AddEvent( std::vector<unsigned int>({1,2,3,4}), 2.0, true ), std::runtime_error);
+    EXPECT_THROW( eventSample->AddEvent( std::vector<unsigned long>({1,2,3,4}), 2.0, true ), std::runtime_error);
     
 }
 
 TEST_F(EventSampleTest, AddingEventsWithZeroWeightWorksCorrectly) {
  
     // Add some more Signal and Background events   
-    for(unsigned int i = 0; i < 10; ++i) { 
-        eventSample->AddEvent( std::vector<unsigned int>({2*i,3*i,5*i,1}), i % 3, i % 2 == 0 );
+    for(unsigned long i = 0; i < 10; ++i) { 
+        eventSample->AddEvent( std::vector<unsigned long>({2*i,3*i,5*i,1}), i % 3, i % 2 == 0 );
     }
     EXPECT_EQ( eventSample->GetNSignals(), 5u);
     EXPECT_EQ( eventSample->GetNBckgrds(), 5u);
@@ -682,19 +682,19 @@ TEST_F(EventSampleTest, AddingEventsWithZeroWeightWorksCorrectly) {
 
 TEST_F(EventSampleTest, AddingEventsWithNANWeightsThrow) {
  
-    eventSample->AddEvent( std::vector<unsigned int>({2,3,5,1}), 1.0, true);
-    EXPECT_THROW(eventSample->AddEvent( std::vector<unsigned int>({2,3,5,1}), NAN, true), std::runtime_error);
+    eventSample->AddEvent( std::vector<unsigned long>({2,3,5,1}), 1.0, true);
+    EXPECT_THROW(eventSample->AddEvent( std::vector<unsigned long>({2,3,5,1}), NAN, true), std::runtime_error);
 
 }
 
 class CumulativeDistributionsTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
-            const unsigned int numberOfEvents = 100;
+            const unsigned long numberOfEvents = 100;
             eventSample = new EventSample(numberOfEvents, 2, 2, {2, 2, 3, 3});
-            for(unsigned int i = 0; i < numberOfEvents; ++i) {
+            for(unsigned long i = 0; i < numberOfEvents; ++i) {
                 bool isSignal = i < (numberOfEvents/2);
-                eventSample->AddEvent( std::vector<unsigned int>({i % 4 + 1, (numberOfEvents-i) % 4 + 1, 1, i % 3}), static_cast<Weight>(i+1), isSignal);
+                eventSample->AddEvent( std::vector<unsigned long>({i % 4 + 1, (numberOfEvents-i) % 4 + 1, 1, i % 3}), static_cast<Weight>(i+1), isSignal);
             }
         }
 
@@ -733,20 +733,20 @@ TEST_F(CumulativeDistributionsTest, NaNShouldBeIgnored) {
 
     CumulativeDistributions CDFsForLayer0(0, *eventSample);
             
-    std::vector<unsigned int> v(4);
+    std::vector<unsigned long> v(4);
     EventSample *newEventSample = new EventSample(200, 2, 2, {2, 2, 3, 3});
-    for(unsigned int i = 0; i < 100; ++i) {
+    for(unsigned long i = 0; i < 100; ++i) {
         v[0] = eventSample->GetValues().Get(i, 0);
         v[1] = eventSample->GetValues().Get(i, 1);
         v[2] = eventSample->GetValues().GetSpectator(i, 0);
         v[3] = eventSample->GetValues().GetSpectator(i, 1);
         newEventSample->AddEvent(v, eventSample->GetWeights().GetOriginalWeight(i), eventSample->IsSignal(i));
-        newEventSample->AddEvent(std::vector<unsigned int>({0, 0, 1, 2}), 1.0, i < 50);
+        newEventSample->AddEvent(std::vector<unsigned long>({0, 0, 1, 2}), 1.0, i < 50);
     }
     CumulativeDistributions newCDFsForLayer0(0, *newEventSample);
     delete newEventSample;
 
-    for(unsigned int iBin = 1; iBin < 5; ++iBin) {
+    for(unsigned long iBin = 1; iBin < 5; ++iBin) {
       EXPECT_FLOAT_EQ( CDFsForLayer0.GetSignal(0, 0, iBin), newCDFsForLayer0.GetSignal(0, 0, iBin)); 
       EXPECT_FLOAT_EQ( CDFsForLayer0.GetBckgrd(0, 0, iBin), newCDFsForLayer0.GetBckgrd(0, 0, iBin)); 
       EXPECT_FLOAT_EQ( CDFsForLayer0.GetSignal(0, 1, iBin), newCDFsForLayer0.GetSignal(0, 1, iBin)); 
@@ -769,20 +769,20 @@ TEST_F(CumulativeDistributionsTest, ZeroWeightShouldBeIgnored) {
 
     CumulativeDistributions CDFsForLayer0(0, *eventSample);
             
-    std::vector<unsigned int> v(4);
+    std::vector<unsigned long> v(4);
     EventSample *newEventSample = new EventSample(200, 2, 2, {2, 2, 3, 3});
-    for(unsigned int i = 0; i < 100; ++i) {
+    for(unsigned long i = 0; i < 100; ++i) {
         v[0] = eventSample->GetValues().Get(i, 0);
         v[1] = eventSample->GetValues().Get(i, 1);
         v[2] = eventSample->GetValues().GetSpectator(i, 0);
         v[3] = eventSample->GetValues().GetSpectator(i, 1);
         newEventSample->AddEvent(v, eventSample->GetWeights().GetOriginalWeight(i), eventSample->IsSignal(i));
-        newEventSample->AddEvent(std::vector<unsigned int>({i%2 + 1, i%3 + 1, 1, 2}), 0.0, i < 50);
+        newEventSample->AddEvent(std::vector<unsigned long>({i%2 + 1, i%3 + 1, 1, 2}), 0.0, i < 50);
     }
     CumulativeDistributions newCDFsForLayer0(0, *newEventSample);
     delete newEventSample;
 
-    for(unsigned int iBin = 0; iBin < 5; ++iBin) {
+    for(unsigned long iBin = 0; iBin < 5; ++iBin) {
       EXPECT_FLOAT_EQ( CDFsForLayer0.GetSignal(0, 0, iBin), newCDFsForLayer0.GetSignal(0, 0, iBin)); 
       EXPECT_FLOAT_EQ( CDFsForLayer0.GetBckgrd(0, 0, iBin), newCDFsForLayer0.GetBckgrd(0, 0, iBin)); 
       EXPECT_FLOAT_EQ( CDFsForLayer0.GetSignal(0, 1, iBin), newCDFsForLayer0.GetSignal(0, 1, iBin)); 
@@ -795,10 +795,10 @@ TEST_F(CumulativeDistributionsTest, ZeroWeightShouldBeIgnored) {
 TEST_F(CumulativeDistributionsTest, CheckIfLayer1IsCorrect) {
     
     auto &eventFlags = eventSample->GetFlags();
-    for(unsigned int i = 0; i < 50; ++i) {
+    for(unsigned long i = 0; i < 50; ++i) {
         eventFlags.Set(i, i%2 + 2 );
     }
-    for(unsigned int i = 50; i < 100; ++i) {
+    for(unsigned long i = 50; i < 100; ++i) {
         eventFlags.Set(149-i, i%2 + 2 );
     }
 
@@ -843,18 +843,18 @@ TEST_F(CumulativeDistributionsTest, CheckIfLayer1IsCorrect) {
 }
 
 TEST_F(CumulativeDistributionsTest, DifferentBinningLevels) {
-    const unsigned int numberOfEvents = 10;
+    const unsigned long numberOfEvents = 10;
     EventSample *sample = new EventSample(numberOfEvents, 4, 0, {2, 1, 3, 1});
-    sample->AddEvent(std::vector<unsigned int>{3, 1, 8, 2}, 1.0, true); 
-    sample->AddEvent(std::vector<unsigned int>{4, 2, 7, 2}, 1.0, true); 
-    sample->AddEvent(std::vector<unsigned int>{3, 2, 6, 0}, 1.0, true); 
-    sample->AddEvent(std::vector<unsigned int>{2, 1, 5, 1}, 1.0, true); 
-    sample->AddEvent(std::vector<unsigned int>{1, 1, 4, 1}, 1.0, true); 
-    sample->AddEvent(std::vector<unsigned int>{3, 1, 3, 2}, 1.0, false); 
-    sample->AddEvent(std::vector<unsigned int>{4, 2, 2, 2}, 1.0, false); 
-    sample->AddEvent(std::vector<unsigned int>{3, 2, 1, 0}, 1.0, false); 
-    sample->AddEvent(std::vector<unsigned int>{2, 1, 2, 1}, 1.0, false); 
-    sample->AddEvent(std::vector<unsigned int>{1, 1, 3, 2}, 1.0, false); 
+    sample->AddEvent(std::vector<unsigned long>{3, 1, 8, 2}, 1.0, true); 
+    sample->AddEvent(std::vector<unsigned long>{4, 2, 7, 2}, 1.0, true); 
+    sample->AddEvent(std::vector<unsigned long>{3, 2, 6, 0}, 1.0, true); 
+    sample->AddEvent(std::vector<unsigned long>{2, 1, 5, 1}, 1.0, true); 
+    sample->AddEvent(std::vector<unsigned long>{1, 1, 4, 1}, 1.0, true); 
+    sample->AddEvent(std::vector<unsigned long>{3, 1, 3, 2}, 1.0, false); 
+    sample->AddEvent(std::vector<unsigned long>{4, 2, 2, 2}, 1.0, false); 
+    sample->AddEvent(std::vector<unsigned long>{3, 2, 1, 0}, 1.0, false); 
+    sample->AddEvent(std::vector<unsigned long>{2, 1, 2, 1}, 1.0, false); 
+    sample->AddEvent(std::vector<unsigned long>{1, 1, 3, 2}, 1.0, false); 
     
     CumulativeDistributions CDFsForLayer0(0, *sample);
 
@@ -907,7 +907,7 @@ TEST_F(CumulativeDistributionsTest, DifferentBinningLevels) {
     EXPECT_FLOAT_EQ( CDFsForLayer0.GetBckgrd(0, 3, 2), 4.0); 
     
     auto &eventFlags = sample->GetFlags();
-    for(unsigned int i = 0; i < 10; ++i) {
+    for(unsigned long i = 0; i < 10; ++i) {
       eventFlags.Set(i, i%2 + 2);
     }
 
@@ -974,14 +974,14 @@ class NodeTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
             eventSample = new EventSample(8, 2, 0, {1, 1});
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1 }), 4.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1 }), 4.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2 }), 3.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1 }), 2.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1 }), 3.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2 }), 2.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1 }), 4.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1 }), 4.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2 }), 3.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1 }), 2.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1 }), 3.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2 }), 2.0, false);
             
         }
 
@@ -1177,14 +1177,14 @@ class TreeBuilderTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
             eventSample = new EventSample(8, 2, 0, {1, 1});
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1 }), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1 }), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1 }), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1 }), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
 
             auto &weights = eventSample->GetWeights();
             weights.SetBoostWeight(0, 4.0);
@@ -1288,7 +1288,7 @@ class TreeTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
 
-            Cut<unsigned int> cut1, cut2, cut3;
+            Cut<unsigned long> cut1, cut2, cut3;
             cut1.feature = 0;
             cut1.index = 5;
             cut1.valid = true;
@@ -1297,57 +1297,57 @@ class TreeTest : public ::testing::Test {
             cut2.valid = true;
             cut3.valid = false;
             
-            std::vector<Cut<unsigned int>> cuts = {cut1, cut2, cut3};
+            std::vector<Cut<unsigned long>> cuts = {cut1, cut2, cut3};
             std::vector<Weight> nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
             std::vector<Weight> purities = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 };
             std::vector<Weight> boostWeights = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-            tree = new Tree<unsigned int>(cuts, nEntries, purities, boostWeights);            
+            tree = new Tree<unsigned long>(cuts, nEntries, purities, boostWeights);            
         }
 
         virtual void TearDown() {
             delete tree;
         }
 
-        Tree<unsigned int> *tree;
+        Tree<unsigned long> *tree;
 
 };
 
 TEST_F(TreeTest, ValueToNode) {
 
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({2,3,31}) ), 3u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({2,9,4}) ), 4u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({4,9,31}) ), 4u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({4,8,4}) ), 3u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({5,8,31}) ), 2u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({5,9,4}) ), 2u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({2,3,31}) ), 3u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({2,9,4}) ), 4u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({4,9,31}) ), 4u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({4,8,4}) ), 3u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({5,8,31}) ), 2u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({5,9,4}) ), 2u );
 
 }
 
 TEST_F(TreeTest, NaNToNode) {
 
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({0,3,31}) ), 0u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({2,3,0}) ), 3u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({2,0,4}) ), 1u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({2,9,4}) ), 4u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({5,0,31}) ), 2u );
-    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned int>({5,9,0}) ), 2u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({0,3,31}) ), 0u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({2,3,0}) ), 3u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({2,0,4}) ), 1u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({2,9,4}) ), 4u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({5,0,31}) ), 2u );
+    EXPECT_EQ(tree->ValueToNode( std::vector<unsigned long>({5,9,0}) ), 2u );
 
 }
 
 TEST_F(TreeTest, NEntries) {
-    for(unsigned int i = 0; i < 7; ++i) {
+    for(unsigned long i = 0; i < 7; ++i) {
         EXPECT_FLOAT_EQ(tree->GetNEntries(i), 10.0 + i);
     }
 }
 
 TEST_F(TreeTest, Purities) {
-    for(unsigned int i = 0; i < 7; ++i) {
+    for(unsigned long i = 0; i < 7; ++i) {
         EXPECT_FLOAT_EQ(tree->GetPurity(i), 0.1*(i+1) );
     }
 }
 
 TEST_F(TreeTest, BoostWeights) {
-    for(unsigned int i = 0; i < 7; ++i) {
+    for(unsigned long i = 0; i < 7; ++i) {
         EXPECT_FLOAT_EQ(tree->GetBoostWeight(i), 1.0*(i+1) );
     }
 }
@@ -1356,26 +1356,26 @@ class ForestBuilderTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
             eventSample = new EventSample(20, 2, 2, {1, 1, 1, 1});
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1, 1, 1}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1, 1, 2 }), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1, 2, 1}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1, 2, 2}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 2, 1, 2}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1, 1, 1}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1, 2, 1}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1, 1, 2}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1, 2, 2}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2, 2, 2}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2, 2, 2}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2, 1, 1}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1, 1, 2}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 1, 1, 1}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 1, 2, 1, 1}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1, 1, 2}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1, 2, 1}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 1, 2, 1}), 1.0, true);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2, 1, 2}), 1.0, false);
-            eventSample->AddEvent( std::vector<unsigned int>({ 2, 2, 2, 1}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1, 1, 1}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1, 1, 2 }), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1, 2, 1}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1, 2, 2}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 2, 1, 2}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1, 1, 1}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1, 2, 1}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1, 1, 2}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1, 2, 2}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2, 2, 2}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2, 2, 2}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2, 1, 1}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1, 1, 2}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 1, 1, 1}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 1, 2, 1, 1}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1, 1, 2}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1, 2, 1}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 1, 2, 1}), 1.0, true);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2, 1, 2}), 1.0, false);
+            eventSample->AddEvent( std::vector<unsigned long>({ 2, 2, 2, 1}), 1.0, false);
         }
 
         virtual void TearDown() {
@@ -1411,7 +1411,7 @@ class ForestTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
 
-            Cut<unsigned int> cut1, cut2, cut3;
+            Cut<unsigned long> cut1, cut2, cut3;
             cut1.feature = 0;
             cut1.index = 5;
             cut1.valid = true;
@@ -1422,13 +1422,13 @@ class ForestTest : public ::testing::Test {
             cut2.gain = 1.0;
             cut3.valid = false;
             
-            std::vector<Cut<unsigned int>> cuts = {cut1, cut2, cut3};
+            std::vector<Cut<unsigned long>> cuts = {cut1, cut2, cut3};
             std::vector<Weight> nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
             std::vector<Weight> purities = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 };
             std::vector<Weight> boostWeights = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-            tree = new Tree<unsigned int>(cuts, nEntries, purities, boostWeights);            
+            tree = new Tree<unsigned long>(cuts, nEntries, purities, boostWeights);            
 
-            forest = new Forest<unsigned int>(0.1, 1.0, true);
+            forest = new Forest<unsigned long>(0.1, 1.0, true);
         }
 
         virtual void TearDown() {
@@ -1436,14 +1436,14 @@ class ForestTest : public ::testing::Test {
             delete forest;
         }
 
-        Tree<unsigned int> *tree;
-        Forest<unsigned int> *forest;
+        Tree<unsigned long> *tree;
+        Forest<unsigned long> *forest;
 
 };
 
 TEST_F(ForestTest, GetF) {
 
-    std::vector<unsigned int> values = {1,1};
+    std::vector<unsigned long> values = {1,1};
     EXPECT_FLOAT_EQ(forest->GetF(values), 1.0);
     forest->AddTree(*tree);
     EXPECT_FLOAT_EQ(forest->GetF(values), 1.4);
@@ -1456,29 +1456,29 @@ TEST_F(ForestTest, GetF) {
 class VariableRankingTest : public ::testing::Test {
     protected:
         virtual void SetUp() {
-            forest = new Forest<unsigned int>(0.1, 1.0, true);
+            forest = new Forest<unsigned long>(0.1, 1.0, true);
         }
 
         virtual void TearDown() {
             delete forest;
         }
 
-        Forest<unsigned int> *forest;
+        Forest<unsigned long> *forest;
 };
 
 TEST_F(VariableRankingTest, OneVariable) {
     
-    Cut<unsigned int> cut1;
+    Cut<unsigned long> cut1;
     cut1.feature = 1;
     cut1.index = 5;
     cut1.valid = true;
     cut1.gain = 2.0;
 
-    std::vector<Cut<unsigned int>> cuts = {cut1};
+    std::vector<Cut<unsigned long>> cuts = {cut1};
     std::vector<Weight> nEntries = { 10.0, 4.0, 6.0};
     std::vector<Weight> purities = { 0.1, 0.2, 0.3 };
     std::vector<Weight> boostWeights = {1.0, 2.0, 3.0};
-    Tree<unsigned int> tree(cuts, nEntries, purities, boostWeights);            
+    Tree<unsigned long> tree(cuts, nEntries, purities, boostWeights);            
     forest->AddTree(tree);
     auto map = forest->GetVariableRanking();
     EXPECT_EQ(map.size(), 1u);
@@ -1488,7 +1488,7 @@ TEST_F(VariableRankingTest, OneVariable) {
 
 TEST_F(VariableRankingTest, Standard) {
     
-    Cut<unsigned int> cut1, cut2, cut3;
+    Cut<unsigned long> cut1, cut2, cut3;
     cut1.feature = 0;
     cut1.index = 5;
     cut1.valid = true;
@@ -1499,11 +1499,11 @@ TEST_F(VariableRankingTest, Standard) {
     cut2.gain = 1.0;
     cut3.valid = false;
 
-    std::vector<Cut<unsigned int>> cuts = {cut1, cut2, cut3};
+    std::vector<Cut<unsigned long>> cuts = {cut1, cut2, cut3};
     std::vector<Weight> nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
     std::vector<Weight> purities = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 };
     std::vector<Weight> boostWeights = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-    Tree<unsigned int> tree(cuts, nEntries, purities, boostWeights);            
+    Tree<unsigned long> tree(cuts, nEntries, purities, boostWeights);            
     forest->AddTree(tree);
     auto map = forest->GetVariableRanking();
     EXPECT_FLOAT_EQ(map[0], 2.0/3.0);
@@ -1513,7 +1513,7 @@ TEST_F(VariableRankingTest, Standard) {
 
 TEST_F(VariableRankingTest, Individual) {
     
-    Cut<unsigned int> cut1, cut2, cut3;
+    Cut<unsigned long> cut1, cut2, cut3;
     cut1.feature = 0;
     cut1.index = 5;
     cut1.valid = true;
@@ -1524,18 +1524,18 @@ TEST_F(VariableRankingTest, Individual) {
     cut2.gain = 1.0;
     cut3.valid = false;
 
-    std::vector<Cut<unsigned int>> cuts = {cut1, cut2, cut3};
+    std::vector<Cut<unsigned long>> cuts = {cut1, cut2, cut3};
     std::vector<Weight> nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
     std::vector<Weight> purities = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 };
     std::vector<Weight> boostWeights = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-    Tree<unsigned int> tree(cuts, nEntries, purities, boostWeights);            
+    Tree<unsigned long> tree(cuts, nEntries, purities, boostWeights);            
     forest->AddTree(tree);
-    std::vector<unsigned int> event = {4, 8};
+    std::vector<unsigned long> event = {4, 8};
     auto map = forest->GetIndividualVariableRanking(event);
     EXPECT_FLOAT_EQ(map[0], 2.0/3.0);
     EXPECT_FLOAT_EQ(map[1], 1.0/3.0);
     
-    std::vector<unsigned int> event2 = {6, 8};
+    std::vector<unsigned long> event2 = {6, 8};
     auto map2 = forest->GetIndividualVariableRanking(event2);
     EXPECT_FLOAT_EQ(map2[0], 1.0);
     EXPECT_FLOAT_EQ(map2[1], 0.0);
@@ -1548,20 +1548,20 @@ class CornerCasesTest : public ::testing::Test { };
 TEST_F(CornerCasesTest, OnlySignalGivesReasonableResult) {
 
     EventSample eventSample(5, 2, 0, {1, 1});
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, true);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, true);
     // Train without randomness and only with one layer per tree
     ForestBuilder forest(eventSample, 10, 0.1, 1.0, 1); 
     EXPECT_FLOAT_EQ(forest.GetF0(), std::numeric_limits<double>::infinity());
     
-    FastBDT::Forest<unsigned int> testforest( forest.GetShrinkage(), forest.GetF0(), true);
+    FastBDT::Forest<unsigned long> testforest( forest.GetShrinkage(), forest.GetF0(), true);
     for( auto t : forest.GetForest() )
         testforest.AddTree(t);
     
-    std::vector<unsigned int> values = {0, 1};
+    std::vector<unsigned long> values = {0, 1};
     EXPECT_FLOAT_EQ(testforest.Analyse(values), 1.0);
     
     values = {2, 1};
@@ -1576,20 +1576,20 @@ TEST_F(CornerCasesTest, OnlySignalGivesReasonableResult) {
 TEST_F(CornerCasesTest, OnlyBackgroundGivesReasonableResult) {
 
     EventSample eventSample(5, 2, 0, {1, 1});
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, false);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, false);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, false);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, false);
-    eventSample.AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, false);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, false);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, false);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, false);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, false);
+    eventSample.AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, false);
     // Train without randomness and only with one layer per tree
     ForestBuilder forest(eventSample, 10, 0.1, 1.0, 1); 
     EXPECT_FLOAT_EQ(forest.GetF0(), -std::numeric_limits<double>::infinity());
     
-    FastBDT::Forest<unsigned int> testforest( forest.GetShrinkage(), forest.GetF0(), true);
+    FastBDT::Forest<unsigned long> testforest( forest.GetShrinkage(), forest.GetF0(), true);
     for( auto t : forest.GetForest() )
         testforest.AddTree(t);
     
-    std::vector<unsigned int> values = {0, 1};
+    std::vector<unsigned long> values = {0, 1};
     EXPECT_FLOAT_EQ(testforest.Analyse(values), 0.0);
     
     values = {2, 1};
@@ -1604,47 +1604,47 @@ TEST_F(CornerCasesTest, OnlyBackgroundGivesReasonableResult) {
 TEST_F(CornerCasesTest, PerfectSeparationWithDifferentWeights) {
     
     EventSample eventSample1(6, 2, 0, {1, 1});
-    eventSample1.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample1.AddEvent( std::vector<unsigned int>({ 2, 1 }), 1.0, true);
-    eventSample1.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample1.AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
-    eventSample1.AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, false);
-    eventSample1.AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
+    eventSample1.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample1.AddEvent( std::vector<unsigned long>({ 2, 1 }), 1.0, true);
+    eventSample1.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample1.AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
+    eventSample1.AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, false);
+    eventSample1.AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
 
     EventSample eventSample2(6, 2, 0, {1, 1});
-    eventSample2.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample2.AddEvent( std::vector<unsigned int>({ 2, 1 }), 2.0, true);
-    eventSample2.AddEvent( std::vector<unsigned int>({ 1, 1 }), 3.0, true);
-    eventSample2.AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
-    eventSample2.AddEvent( std::vector<unsigned int>({ 1, 2 }), 2.0, false);
-    eventSample2.AddEvent( std::vector<unsigned int>({ 2, 2 }), 3.0, false);
+    eventSample2.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample2.AddEvent( std::vector<unsigned long>({ 2, 1 }), 2.0, true);
+    eventSample2.AddEvent( std::vector<unsigned long>({ 1, 1 }), 3.0, true);
+    eventSample2.AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
+    eventSample2.AddEvent( std::vector<unsigned long>({ 1, 2 }), 2.0, false);
+    eventSample2.AddEvent( std::vector<unsigned long>({ 2, 2 }), 3.0, false);
 
     EventSample eventSample3(7, 2, 0, {1, 1});
-    eventSample3.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample3.AddEvent( std::vector<unsigned int>({ 2, 1 }), 1.0, true);
-    eventSample3.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample3.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample3.AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
-    eventSample3.AddEvent( std::vector<unsigned int>({ 1, 2 }), 1.0, false);
-    eventSample3.AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
+    eventSample3.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample3.AddEvent( std::vector<unsigned long>({ 2, 1 }), 1.0, true);
+    eventSample3.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample3.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample3.AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
+    eventSample3.AddEvent( std::vector<unsigned long>({ 1, 2 }), 1.0, false);
+    eventSample3.AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
 
     EventSample eventSample4(7, 2, 0, {1, 1});
-    eventSample4.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample4.AddEvent( std::vector<unsigned int>({ 2, 1 }), 2.0, true);
-    eventSample4.AddEvent( std::vector<unsigned int>({ 1, 1 }), 3.0, true);
-    eventSample4.AddEvent( std::vector<unsigned int>({ 1, 1 }), 4.0, true);
-    eventSample4.AddEvent( std::vector<unsigned int>({ 2, 2 }), 1.0, false);
-    eventSample4.AddEvent( std::vector<unsigned int>({ 1, 2 }), 2.0, false);
-    eventSample4.AddEvent( std::vector<unsigned int>({ 2, 2 }), 3.0, false);
+    eventSample4.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample4.AddEvent( std::vector<unsigned long>({ 2, 1 }), 2.0, true);
+    eventSample4.AddEvent( std::vector<unsigned long>({ 1, 1 }), 3.0, true);
+    eventSample4.AddEvent( std::vector<unsigned long>({ 1, 1 }), 4.0, true);
+    eventSample4.AddEvent( std::vector<unsigned long>({ 2, 2 }), 1.0, false);
+    eventSample4.AddEvent( std::vector<unsigned long>({ 1, 2 }), 2.0, false);
+    eventSample4.AddEvent( std::vector<unsigned long>({ 2, 2 }), 3.0, false);
 
     EventSample eventSample5(7, 2, 0, {1, 1});
-    eventSample5.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample5.AddEvent( std::vector<unsigned int>({ 2, 1 }), 2.0, true);
-    eventSample5.AddEvent( std::vector<unsigned int>({ 1, 1 }), 3.0, true);
-    eventSample5.AddEvent( std::vector<unsigned int>({ 1, 1 }), 1.0, true);
-    eventSample5.AddEvent( std::vector<unsigned int>({ 2, 2 }), 2.0, false);
-    eventSample5.AddEvent( std::vector<unsigned int>({ 1, 2 }), 3.0, false);
-    eventSample5.AddEvent( std::vector<unsigned int>({ 2, 2 }), 2.0, false);
+    eventSample5.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample5.AddEvent( std::vector<unsigned long>({ 2, 1 }), 2.0, true);
+    eventSample5.AddEvent( std::vector<unsigned long>({ 1, 1 }), 3.0, true);
+    eventSample5.AddEvent( std::vector<unsigned long>({ 1, 1 }), 1.0, true);
+    eventSample5.AddEvent( std::vector<unsigned long>({ 2, 2 }), 2.0, false);
+    eventSample5.AddEvent( std::vector<unsigned long>({ 1, 2 }), 3.0, false);
+    eventSample5.AddEvent( std::vector<unsigned long>({ 2, 2 }), 2.0, false);
 
     std::vector<EventSample*> eventSamples = {&eventSample1, &eventSample2, &eventSample3, &eventSample4, &eventSample5};
 
@@ -1653,9 +1653,9 @@ TEST_F(CornerCasesTest, PerfectSeparationWithDifferentWeights) {
         // Calculate prior probability before building the forest
         Weight sig = 0;
         Weight tot = 0;
-        const unsigned int nSignals = sample->GetNSignals();
-        const unsigned int nEvents = sample->GetNEvents();
-        for(unsigned int iEvent = 0; iEvent < nEvents; ++iEvent) {
+        const unsigned long nSignals = sample->GetNSignals();
+        const unsigned long nEvents = sample->GetNEvents();
+        for(unsigned long iEvent = 0; iEvent < nEvents; ++iEvent) {
             if(iEvent < nSignals)
                 sig += sample->GetWeights().GetOriginalWeight(iEvent);
             tot += sample->GetWeights().GetOriginalWeight(iEvent);
@@ -1666,13 +1666,13 @@ TEST_F(CornerCasesTest, PerfectSeparationWithDifferentWeights) {
         // however with 10 trees we already get pretty close to perfect separation.
         ForestBuilder forest(*sample, 10, 1.0, 1.0, 1); 
         
-        FastBDT::Forest<unsigned int> testforest( forest.GetShrinkage(), forest.GetF0(), true);
+        FastBDT::Forest<unsigned long> testforest( forest.GetShrinkage(), forest.GetF0(), true);
         for( auto t : forest.GetForest() ) {
             //t.Print();
             testforest.AddTree(t);
         }
         
-        std::vector<unsigned int> values = {0, 1};
+        std::vector<unsigned long> values = {0, 1};
         EXPECT_GE(testforest.Analyse(values), 0.999);
         
         values = {2, 1};
@@ -1692,20 +1692,20 @@ TEST_F(CornerCasesTest, PerfectSeparationWithDifferentWeights) {
 
 TEST_F(CornerCasesTest, PerfectSeparationGivesReasonableResults) {
 
-    Cut<unsigned int> cut1;
+    Cut<unsigned long> cut1;
     cut1.feature = 0;
     cut1.index = 2;
     cut1.valid = true;
     
-    std::vector<Cut<unsigned int>> cuts = {cut1};
+    std::vector<Cut<unsigned long>> cuts = {cut1};
     std::vector<Weight> nEntries = { 10.0, 11.0, 12.0 };
     std::vector<Weight> purities = { 0.5, 0.0, 1.0};
     std::vector<Weight> boostWeights = { 0.0, -std::numeric_limits<Weight>::infinity(), std::numeric_limits<Weight>::infinity()};
-    Tree<unsigned int> testtree(cuts, nEntries, purities, boostWeights);
-    Forest<unsigned int> testforest(0.1, 0.0, true);
+    Tree<unsigned long> testtree(cuts, nEntries, purities, boostWeights);
+    Forest<unsigned long> testforest(0.1, 0.0, true);
     testforest.AddTree(testtree);
 
-    std::vector<unsigned int> values = {1, 1};
+    std::vector<unsigned long> values = {1, 1};
     EXPECT_FLOAT_EQ(testforest.Analyse(values), 0.0);
     
     values = {3, 1};
@@ -1722,7 +1722,7 @@ class RegressionTest : public ::testing::Test {
 
 TEST_F(TreeTest, LastCutOnTheRightWasNeverUsed) {
             
-    Cut<unsigned int> cut1, cut2, cut3;
+    Cut<unsigned long> cut1, cut2, cut3;
     cut1.feature = 0;
     cut1.index = 2;
     cut1.valid = true;
@@ -1733,20 +1733,20 @@ TEST_F(TreeTest, LastCutOnTheRightWasNeverUsed) {
     cut3.index = 2;
     cut3.valid = true;
     
-    std::vector<Cut<unsigned int>> cuts = {cut1, cut2, cut3};
+    std::vector<Cut<unsigned long>> cuts = {cut1, cut2, cut3};
     std::vector<Weight> nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
     std::vector<Weight> purities = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 };
     std::vector<Weight> boostWeights = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-    Tree<unsigned int> tree(cuts, nEntries, purities, boostWeights);            
+    Tree<unsigned long> tree(cuts, nEntries, purities, boostWeights);            
 
     // Check if we can reach all nodes
-    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned int>({0,0}) ), 0u );
-    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned int>({1,0}) ), 1u );
-    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned int>({2,0}) ), 2u );
-    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned int>({1,1}) ), 3u );
-    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned int>({1,2}) ), 4u );
-    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned int>({2,1}) ), 5u );
-    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned int>({2,2}) ), 6u );
+    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned long>({0,0}) ), 0u );
+    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned long>({1,0}) ), 1u );
+    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned long>({2,0}) ), 2u );
+    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned long>({1,1}) ), 3u );
+    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned long>({1,2}) ), 4u );
+    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned long>({2,1}) ), 5u );
+    EXPECT_EQ(tree.ValueToNode( std::vector<unsigned long>({2,2}) ), 6u );
 
 }
 
@@ -1757,7 +1757,7 @@ class RewriteTest : public ::testing::Test {
             std::vector<float> binning = { 0.0f, 0.25f, 0.5f, 0.75f, 1.0f }; 
             featureBinning = new FeatureBinning<float>(2, binning);
 
-            Cut<unsigned int> cut1, cut2, cut3;
+            Cut<unsigned long> cut1, cut2, cut3;
             cut1.feature = 0;
             cut1.index = 2;
             cut1.valid = true;
@@ -1771,12 +1771,12 @@ class RewriteTest : public ::testing::Test {
             cut3.valid = true;
             cut3.gain = 1.0;
             
-            std::vector<Cut<unsigned int>> cuts = {cut1, cut2, cut3};
+            std::vector<Cut<unsigned long>> cuts = {cut1, cut2, cut3};
             std::vector<Weight> nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
             std::vector<Weight> purities = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 };
             std::vector<Weight> boostWeights = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-            Tree<unsigned int> tree(cuts, nEntries, purities, boostWeights);
-            forest = new Forest<unsigned int>(1.0, 0.0, true);
+            Tree<unsigned long> tree(cuts, nEntries, purities, boostWeights);
+            forest = new Forest<unsigned long>(1.0, 0.0, true);
             forest->AddTree(tree);
         }
 
@@ -1785,7 +1785,7 @@ class RewriteTest : public ::testing::Test {
             delete featureBinning;
         }
         FeatureBinning<float> *featureBinning;
-        Forest<unsigned int> *forest;
+        Forest<unsigned long> *forest;
 
 };
 
@@ -1794,7 +1794,7 @@ TEST_F(RewriteTest, CheckSameResultForOriginalAndRewrittenFloatForest) {
     auto rewritten_forest = removeFeatureBinningTransformationFromForest<float>(*forest, {*featureBinning});
     std::vector<float> values = {-1.0f, -0.5f, 0.0f, 0.1f, 0.25f, 0.3f, 0.5f, 0.6f, 0.75f, 0.9f, 1.0f, 1.2f, std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), NAN, std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest()};
     for(auto &x : values) {
-      EXPECT_FLOAT_EQ(forest->GetF(std::vector<unsigned int>({featureBinning->ValueToBin(x)})), rewritten_forest.GetF(std::vector<float>({x})));
+      EXPECT_FLOAT_EQ(forest->GetF(std::vector<unsigned long>({featureBinning->ValueToBin(x)})), rewritten_forest.GetF(std::vector<float>({x})));
     }
 
 }

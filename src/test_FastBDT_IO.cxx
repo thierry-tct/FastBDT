@@ -45,7 +45,7 @@ TEST_F(IOTest, IOVector) {
     stream >> after;
 
     EXPECT_EQ(before.size(), after.size());
-    for(unsigned int i = 0; i < before.size() and i < after.size(); ++i)
+    for(unsigned long i = 0; i < before.size() and i < after.size(); ++i)
         EXPECT_FLOAT_EQ(before[i], after[i]);
 
 }
@@ -69,7 +69,7 @@ TEST_F(IOTest, IOUsingSpecialValuesFloat) {
     stream >> after;
 
     EXPECT_EQ(before.size(), after.size());
-    for(unsigned int i = 0; i < before.size() and i < after.size(); ++i)
+    for(unsigned long i = 0; i < before.size() and i < after.size(); ++i)
         EXPECT_FLOAT_EQ_NAN_SAFE(before[i], after[i]);
 
 }
@@ -93,7 +93,7 @@ TEST_F(IOTest, IOUsingSpecialValuesDouble) {
     stream >> after;
 
     EXPECT_EQ(before.size(), after.size());
-    for(unsigned int i = 0; i < before.size() and i < after.size(); ++i)
+    for(unsigned long i = 0; i < before.size() and i < after.size(); ++i)
         EXPECT_DOUBLE_EQ_NAN_SAFE(before[i], after[i]);
 
 }
@@ -112,7 +112,7 @@ TEST_F(IOTest, IOFeatureBinning) {
 
     EXPECT_EQ(before.GetNLevels(), after.GetNLevels());
     EXPECT_EQ(before_binning.size(), after_binning.size());
-    for(unsigned int i = 0; i < before_binning.size() and i < after_binning.size(); ++i)
+    for(unsigned long i = 0; i < before_binning.size() and i < after_binning.size(); ++i)
         EXPECT_FLOAT_EQ_NAN_SAFE(before_binning[i], after_binning[i]);
 
 }
@@ -131,7 +131,7 @@ TEST_F(IOTest, IOFeatureBinningVector) {
     stream >> after;
 
     EXPECT_EQ(before.size(), after.size());
-    for(unsigned int j = 0; j < before.size() and j < after.size(); ++j) {
+    for(unsigned long j = 0; j < before.size() and j < after.size(); ++j) {
 
         auto &before_featureBinning = before[j];
         auto &after_featureBinning = after[j];
@@ -140,7 +140,7 @@ TEST_F(IOTest, IOFeatureBinningVector) {
 
         EXPECT_EQ(before_featureBinning.GetNLevels(), after_featureBinning.GetNLevels());
         EXPECT_EQ(before_binning.size(), after_binning.size());
-        for(unsigned int i = 0; i < before_binning.size() and i < after_binning.size(); ++i)
+        for(unsigned long i = 0; i < before_binning.size() and i < after_binning.size(); ++i)
             EXPECT_FLOAT_EQ_NAN_SAFE(before_binning[i], after_binning[i]);
 
     }
@@ -149,7 +149,7 @@ TEST_F(IOTest, IOFeatureBinningVector) {
 
 TEST_F(IOTest, IOCut) {
 
-    Cut<unsigned int> before;
+    Cut<unsigned long> before;
     before.feature = 1;
     before.gain = 3.4;
     before.index = 5;
@@ -158,7 +158,7 @@ TEST_F(IOTest, IOCut) {
     std::stringstream stream;
     stream << before;
 
-    Cut<unsigned int> after;
+    Cut<unsigned long> after;
     stream >> after;
 
     EXPECT_EQ(before.feature, after.feature);
@@ -236,7 +236,7 @@ TEST_F(IOTest, IOCutSpecialValuesDouble) {
             
 TEST_F(IOTest, IOTree) {
 
-    Cut<unsigned int> cut1, cut2, cut3;
+    Cut<unsigned long> cut1, cut2, cut3;
     cut1.feature = 0;
     cut1.index = 5;
     cut1.valid = true;
@@ -250,23 +250,23 @@ TEST_F(IOTest, IOTree) {
     cut3.gain = 0.0;
     cut3.valid = false;
     
-    std::vector<Cut<unsigned int>> before_cuts = {cut1, cut2, cut3};
+    std::vector<Cut<unsigned long>> before_cuts = {cut1, cut2, cut3};
     std::vector<Weight> before_nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
     std::vector<Weight> before_purities = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 };
     std::vector<Weight> before_boostWeights = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
-    Tree<unsigned int> before(before_cuts, before_nEntries, before_purities, before_boostWeights);            
+    Tree<unsigned long> before(before_cuts, before_nEntries, before_purities, before_boostWeights);            
     
     std::stringstream stream;
     stream << before;
 
-    auto after = readTreeFromStream<unsigned int>(stream);
+    auto after = readTreeFromStream<unsigned long>(stream);
     const auto &after_cuts = after.GetCuts();
     const auto &after_purities = after.GetPurities();
     const auto &after_boostWeights = after.GetBoostWeights();
     const auto &after_nEntries = after.GetNEntries();
 
     EXPECT_EQ(before_cuts.size(), after_cuts.size());
-    for(unsigned int i = 0; i < before_cuts.size() and i < after_cuts.size(); ++i) {
+    for(unsigned long i = 0; i < before_cuts.size() and i < after_cuts.size(); ++i) {
         EXPECT_FLOAT_EQ(before_cuts[i].feature, after_cuts[i].feature);
         EXPECT_FLOAT_EQ(before_cuts[i].valid, after_cuts[i].valid);
         EXPECT_FLOAT_EQ(before_cuts[i].index, after_cuts[i].index);
@@ -274,22 +274,22 @@ TEST_F(IOTest, IOTree) {
     }
     
     EXPECT_EQ(before_purities.size(), after_purities.size());
-    for(unsigned int i = 0; i < before_purities.size() and i < after_purities.size(); ++i)
+    for(unsigned long i = 0; i < before_purities.size() and i < after_purities.size(); ++i)
         EXPECT_FLOAT_EQ(before_purities[i], after_purities[i]);
     
     EXPECT_EQ(before_boostWeights.size(), after_boostWeights.size());
-    for(unsigned int i = 0; i < before_boostWeights.size() and i < after_boostWeights.size(); ++i)
+    for(unsigned long i = 0; i < before_boostWeights.size() and i < after_boostWeights.size(); ++i)
         EXPECT_FLOAT_EQ(before_boostWeights[i], after_boostWeights[i]);
     
     EXPECT_EQ(before_nEntries.size(), after_nEntries.size());
-    for(unsigned int i = 0; i < before_nEntries.size() and i < after_nEntries.size(); ++i)
+    for(unsigned long i = 0; i < before_nEntries.size() and i < after_nEntries.size(); ++i)
         EXPECT_FLOAT_EQ(before_nEntries[i], after_nEntries[i]);
 
 }
 
 TEST_F(IOTest, IOForest) {
 
-    Cut<unsigned int> cut1, cut2, cut3, cut4;
+    Cut<unsigned long> cut1, cut2, cut3, cut4;
     cut1.feature = 0;
     cut1.index = 5;
     cut1.valid = true;
@@ -309,15 +309,15 @@ TEST_F(IOTest, IOForest) {
     
     std::vector<Weight> nEntries = { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 };
     
-    Forest<unsigned int> before(0.5, 1.6, true);
-    before.AddTree(Tree<unsigned int>({cut1, cut2, cut3}, nEntries, { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 }, { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}));
-    before.AddTree(Tree<unsigned int>({cut1, cut4, cut3}, nEntries, { 0.6, 0.2, 0.5, 0.4, 0.5, 0.6, 0.7 }, { 2.0, 2.0, 3.0, 5.0, 5.0, 6.0, 1.0}));
+    Forest<unsigned long> before(0.5, 1.6, true);
+    before.AddTree(Tree<unsigned long>({cut1, cut2, cut3}, nEntries, { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 }, { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}));
+    before.AddTree(Tree<unsigned long>({cut1, cut4, cut3}, nEntries, { 0.6, 0.2, 0.5, 0.4, 0.5, 0.6, 0.7 }, { 2.0, 2.0, 3.0, 5.0, 5.0, 6.0, 1.0}));
     const auto &before_forest = before.GetForest();
 
     std::stringstream stream;
     stream << before;
 
-    auto after = readForestFromStream<unsigned int>(stream);
+    auto after = readForestFromStream<unsigned long>(stream);
     const auto &after_forest = after.GetForest();
 
     EXPECT_EQ(before.GetTransform2Probability(), after.GetTransform2Probability());
@@ -325,7 +325,7 @@ TEST_F(IOTest, IOForest) {
     EXPECT_EQ(before.GetShrinkage(), after.GetShrinkage());
 
     EXPECT_EQ(before_forest.size(), after_forest.size());
-    for(unsigned int j = 0; j < before_forest.size() and j < after_forest.size(); ++j) {
+    for(unsigned long j = 0; j < before_forest.size() and j < after_forest.size(); ++j) {
 
         auto &before_tree = before_forest[j];
         const auto &before_cuts = before_tree.GetCuts();
@@ -340,7 +340,7 @@ TEST_F(IOTest, IOForest) {
         const auto &after_nEntries = after_tree.GetNEntries();
 
         EXPECT_EQ(before_cuts.size(), after_cuts.size());
-        for(unsigned int i = 0; i < before_cuts.size() and i < after_cuts.size(); ++i) {
+        for(unsigned long i = 0; i < before_cuts.size() and i < after_cuts.size(); ++i) {
             EXPECT_FLOAT_EQ(before_cuts[i].feature, after_cuts[i].feature);
             EXPECT_FLOAT_EQ(before_cuts[i].valid, after_cuts[i].valid);
             EXPECT_FLOAT_EQ(before_cuts[i].index, after_cuts[i].index);
@@ -348,15 +348,15 @@ TEST_F(IOTest, IOForest) {
         }
         
         EXPECT_EQ(before_purities.size(), after_purities.size());
-        for(unsigned int i = 0; i < before_purities.size() and i < after_purities.size(); ++i)
+        for(unsigned long i = 0; i < before_purities.size() and i < after_purities.size(); ++i)
             EXPECT_FLOAT_EQ(before_purities[i], after_purities[i]);
         
         EXPECT_EQ(before_boostWeights.size(), after_boostWeights.size());
-        for(unsigned int i = 0; i < before_boostWeights.size() and i < after_boostWeights.size(); ++i)
+        for(unsigned long i = 0; i < before_boostWeights.size() and i < after_boostWeights.size(); ++i)
             EXPECT_FLOAT_EQ(before_boostWeights[i], after_boostWeights[i]);
         
         EXPECT_EQ(before_nEntries.size(), after_nEntries.size());
-        for(unsigned int i = 0; i < before_nEntries.size() and i < after_nEntries.size(); ++i)
+        for(unsigned long i = 0; i < before_nEntries.size() and i < after_nEntries.size(); ++i)
             EXPECT_FLOAT_EQ(before_nEntries[i], after_nEntries[i]);
     }
 }
